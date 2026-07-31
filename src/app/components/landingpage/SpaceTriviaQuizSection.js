@@ -46,22 +46,33 @@ export default function SpaceTriviaQuizSection() {
   const currentQuiz = QUIZ_QUESTIONS[quizIndex];
 
   return (
-    <section className="py-16 px-4 md:px-10 max-w-[1280px] mx-auto" id="wawasan-kuis">
-      <div className="bg-[#0F1226]/90 border border-[#22D3EE]/40 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(34,211,238,0.15)] relative overflow-hidden backdrop-blur-md">
-        
+    <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto" id="wawasan-kuis">
+      {/* Standardized Section Header */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
+          <BrainCircuit className="w-4 h-4" />
+          <span>Pusat Kuis & Trivia Kosmik</span>
+        </div>
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
+          Jelajahi Misteri & Kuis Luar Angkasa
+        </h2>
+        <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
+          Uji wawasan astronomimu dan temukan fakta-fakta ilmiah mencengangkan dalam fitur trivia interaktif.
+        </p>
+      </div>
+
+      <div className="bg-slate-900/70 border border-slate-800/80 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden backdrop-blur-xl">
         {/* Glow background accent */}
-        <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#22D3EE]/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-[#80DEEA]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Tab Header Selector */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 border-b border-white/10 pb-6 relative z-10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 border-b border-slate-800 pb-6 relative z-10">
           <div>
-            <span className="text-[11px] font-semibold tracking-widest text-[#22D3EE] uppercase font-['Geist'] bg-[#22D3EE]/10 px-3 py-1 rounded-full border border-[#22D3EE]/30">
-              Pusat Wawasan & Interaktif
-            </span>
-            <h2 className="font-['Sora'] text-2xl md:text-3xl font-bold text-white mt-2">
-              Jelajahi Misteri Luar Angkasa
-            </h2>
+            <h3 className="text-xl md:text-2xl font-bold text-white">
+              Trivia & Tantangan Pengetahuan
+            </h3>
+            <p className="text-xs text-gray-400 mt-1">Pilih mode Fakta Kosmik atau Kuis Pengetahuan</p>
           </div>
 
           {/* Dual Tab Switcher */}

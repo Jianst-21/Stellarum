@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Compass } from 'lucide-react';
 import Link from 'next/link';
 
 export default function PlanetExplorationSection() {
@@ -26,48 +26,51 @@ export default function PlanetExplorationSection() {
   ];
 
   return (
-    <section className="py-24 px-4 md:px-10 max-w-[1280px] mx-auto" id="eksplorasi">
-      <div className="flex justify-between items-end mb-16">
-        <div className="text-left">
-          <h2 className="font-['Sora'] text-3xl font-bold text-[#22D3EE]">Eksplorasi Planet</h2>
+    <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto" id="eksplorasi">
+      {/* Standardized Section Header */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
+          <Compass className="w-4 h-4" />
+          <span>Katalog Dunia Kosmik</span>
         </div>
-        <Link
-          href="/planet"
-          className="hidden md:inline-flex items-center gap-2 text-[#22D3EE] hover:text-[#22D3EE]/80 transition-colors font-['Geist'] text-sm"
-        >
-          Lihat Semua
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
+          Eksplorasi Planet Utama
+        </h2>
+        <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
+          Jelajahi keajaiban dan karakteristik unik planet-planet terbesar di Tata Surya kita.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {planetCards.map((planet, idx) => (
           <div
             key={idx}
-            className="bg-[#0D0E1A] rounded-2xl overflow-hidden group cursor-pointer border border-[#22D3EE]/20 hover:border-[#22D3EE]/60 transition-all duration-300 hover:shadow-[0_0_24px_rgba(34,211,238,0.15)] flex flex-col"
+            className="bg-slate-900/60 rounded-2xl overflow-hidden group cursor-pointer border border-slate-800 hover:border-cyan-500/50 transition-all duration-300 hover:-translate-y-1.5 shadow-xl flex flex-col backdrop-blur-xl"
           >
             <div className="h-48 w-full relative overflow-hidden shrink-0">
               <div
                 className="bg-cover bg-center w-full h-full group-hover:scale-110 transition-transform duration-700"
                 style={{ backgroundImage: `url('${planet.img}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0D0E1A] via-[#0D0E1A]/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
             </div>
             <div className="p-5 flex flex-col gap-2">
-              <h3 className="font-['Sora'] text-lg text-white font-bold">{planet.name}</h3>
-              <p className="text-[#9aa3c4] text-sm leading-relaxed line-clamp-2">{planet.desc}</p>
+              <h3 className="text-lg text-white font-bold">{planet.name}</h3>
+              <p className="text-gray-400 text-sm leading-relaxed line-clamp-2">{planet.desc}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <Link
-        href="/planet"
-        className="mt-8 flex md:hidden items-center justify-center gap-2 bg-transparent text-[#22D3EE] border border-[#22D3EE] font-['Geist'] text-sm w-full py-3 rounded-lg"
-      >
-        Lihat Semua
-        <ArrowRight className="w-4 h-4" />
-      </Link>
+      <div className="flex justify-center">
+        <Link
+          href="/planet"
+          className="inline-flex items-center gap-2 bg-slate-950 text-cyan-400 border border-cyan-500/40 hover:bg-cyan-600 hover:text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-cyan-500/10"
+        >
+          <span>Lihat Seluruh Planet</span>
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
     </section>
   );
 }
