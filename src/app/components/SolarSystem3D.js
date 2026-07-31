@@ -76,6 +76,30 @@ const OBJECT_DATA = {
     desc: "Bongkahan es, debu, dan batuan yang melesat mendekati Matahari dengan orbit sangat lonjong (inklinasi tinggi), meninggalkan ekor gas dan debu.",
     distance: "Bervariasi (hingga triliunan km di Awan Oort)", size: "Umumnya beberapa km",
     more: "Ekor komet selalu mengarah menjauhi Matahari akibat tekanan angin matahari. Orbit komet memiliki kemiringan sudut (inklinasi) tinggi terhadap bidang edar planet, sehingga melintas di atas/bawah lintasan planet tanpa pernah menabraknya."
+  },
+  moon: {
+    name: "Bulan (Luna)", type: "SATELIT ALAMI (BUMI)",
+    desc: "Satu-satunya satelit alami Bumi dan objek paling terang kedua di langit malam setelah Matahari.",
+    distance: "384.400 km (dari Bumi)", size: "3.474 km",
+    more: "Bulan selalu menampilkan sisi yang sama ke Bumi karena mengalami penguncian pasang surut (tidal locking). Gravitasi Bulan memicu pasang surut air laut di Bumi dan menstabilkan kemiringan sumbu rotasi Bumi."
+  },
+  ganymede: {
+    name: "Ganymede", type: "SATELIT ALAMI (JUPITER)",
+    desc: "Satelit alami terbesar di Tata Surya, bahkan lebih besar daripada planet Merkurius.",
+    distance: "1,07 juta km (dari Jupiter)", size: "5.268 km",
+    more: "Ganymede adalah satu-satunya bulan yang diketahui memiliki medan magnetnya sendiri. Di bawah permukaan es dan batuannya, terdapat samudra air cair raksasa yang terperangkap di antara lapisan es."
+  },
+  europa: {
+    name: "Europa", type: "SATELIT ALAMI (JUPITER)",
+    desc: "Satelit es Jupiter dengan permukaan paling mulus di Tata Surya, diselimuti lautan air cair di bawah kerak esnya.",
+    distance: "670.900 km (dari Jupiter)", size: "3.122 km",
+    more: "Europa dianggap sebagai salah satu tempat paling menjanjikan di luar Bumi untuk mencari kehidupan mikroba. Permukaan esnya penuh retakan garis-garis kecokelatan akibat gaya pasang surut gravitasi Jupiter yang sangat kuat."
+  },
+  titan: {
+    name: "Titan", type: "SATELIT ALAMI (SATURNUS)",
+    desc: "Satelit terbesar Saturnus dan satu-satunya bulan di Tata Surya yang memiliki atmosfer tebal serta cairan di permukaannya.",
+    distance: "1,22 juta km (dari Saturnus)", size: "5.149 km",
+    more: "Atmsofer Titan didominasi gas nitrogen. Di permukaannya terdapat danau dan sungai yang mengalirkan metana dan etana cair dalam siklus cuaca hidrokarbon yang mirip dengan siklus air di Bumi."
   }
 };
 
@@ -92,6 +116,10 @@ const AURA_COLORS = {
   pluto: 0xe0e0e0,
   comet: 0x33ff88,
   asteroidbelt: 0x22d3ee,
+  moon: 0xe8e8e8,
+  ganymede: 0xd4b896,
+  europa: 0x80deea,
+  titan: 0xffb74d,
 };
 
 // Helper function to create seamless 360-degree Sun texture
@@ -287,6 +315,58 @@ function createProceduralPlanetTexture(id) {
       const y = Math.random() * height;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
       ctx.fillRect(Math.random() * width, y, 30 + Math.random() * 60, 2 + Math.random() * 3);
+    }
+  } else if (id === 'moon') {
+    ctx.fillStyle = '#9e9e9e';
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 300; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const r = 2 + Math.random() * 10;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = Math.random() > 0.4 ? '#757575' : '#c2c2c2';
+      ctx.fill();
+    }
+  } else if (id === 'ganymede') {
+    ctx.fillStyle = '#948372';
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 40; i++) {
+      const y = Math.random() * height;
+      ctx.beginPath();
+      ctx.ellipse(Math.random() * width, y, 50 + Math.random() * 80, 8 + Math.random() * 15, Math.random(), 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(90, 75, 65, 0.4)';
+      ctx.fill();
+    }
+    for (let i = 0; i < 150; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, 1.5 + Math.random() * 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#e6ded7';
+      ctx.fill();
+    }
+  } else if (id === 'europa') {
+    ctx.fillStyle = '#e0f7fa';
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 35; i++) {
+      const x1 = Math.random() * width;
+      const y1 = Math.random() * height;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 + (Math.random() - 0.5) * 120, y1 + (Math.random() - 0.5) * 80);
+      ctx.strokeStyle = 'rgba(161, 92, 67, 0.6)';
+      ctx.lineWidth = 1 + Math.random() * 2.5;
+      ctx.stroke();
+    }
+  } else if (id === 'titan') {
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    grad.addColorStop(0, '#ffca28');
+    grad.addColorStop(0.5, '#ffa726');
+    grad.addColorStop(1, '#e65100');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 20; i++) {
+      ctx.fillStyle = 'rgba(255, 236, 179, 0.2)';
+      ctx.fillRect(0, Math.random() * height, width, 6 + Math.random() * 12);
     }
   } else {
     ctx.fillStyle = '#c7b299';
@@ -531,12 +611,133 @@ export default function SolarSystem3D() {
       orbitGroup.add(planetMesh);
       clickableMeshes.push(planetMesh);
 
+      // --- PHASE 1 MOONS ADDITIONS ---
+      if (id === 'earth') {
+        const moonOrbitGroup = new THREE.Group();
+        planetMesh.add(moonOrbitGroup);
+
+        const moonDist = 3.6;
+        const moonRingGeo = new THREE.RingGeometry(moonDist - 0.04, moonDist + 0.04, 64);
+        const moonRingMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.25 });
+        const moonRingMesh = new THREE.Mesh(moonRingGeo, moonRingMat);
+        moonRingMesh.rotation.x = Math.PI / 2;
+        moonOrbitGroup.add(moonRingMesh);
+
+        const moonTex = createProceduralPlanetTexture('moon');
+        const moonMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.45, 24, 24),
+          new THREE.MeshStandardMaterial({ map: moonTex, roughness: 0.7 })
+        );
+        moonMesh.position.set(moonDist, 0, 0);
+        moonMesh.userData = { id: 'moon', clickable: true, radiusSize: 0.45 };
+        moonOrbitGroup.add(moonMesh);
+        clickableMeshes.push(moonMesh);
+
+        // Click target sphere for Moon
+        const moonClickGeo = new THREE.SphereGeometry(1.0, 12, 12);
+        const moonClickMat = new THREE.MeshBasicMaterial({ visible: false });
+        const moonClickMesh = new THREE.Mesh(moonClickGeo, moonClickMat);
+        moonClickMesh.userData = { id: 'moon', clickable: true };
+        moonMesh.add(moonClickMesh);
+        clickableMeshes.push(moonClickMesh);
+
+        orbitGroup.userData.moonGroup = moonOrbitGroup;
+      }
+
+      if (id === 'jupiter') {
+        // Europa (Inner Moon)
+        const europaOrbitGroup = new THREE.Group();
+        planetMesh.add(europaOrbitGroup);
+
+        const europaDist = 7.5;
+        const europaRingGeo = new THREE.RingGeometry(europaDist - 0.05, europaDist + 0.05, 64);
+        const europaRingMat = new THREE.MeshBasicMaterial({ color: 0x80deea, side: THREE.DoubleSide, transparent: true, opacity: 0.25 });
+        const europaRingMesh = new THREE.Mesh(europaRingGeo, europaRingMat);
+        europaRingMesh.rotation.x = Math.PI / 2;
+        europaOrbitGroup.add(europaRingMesh);
+
+        const europaTex = createProceduralPlanetTexture('europa');
+        const europaMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.55, 24, 24),
+          new THREE.MeshStandardMaterial({ map: europaTex, roughness: 0.5 })
+        );
+        europaMesh.position.set(europaDist, 0, 0);
+        europaMesh.userData = { id: 'europa', clickable: true, radiusSize: 0.55 };
+        europaOrbitGroup.add(europaMesh);
+        clickableMeshes.push(europaMesh);
+
+        const europaClickGeo = new THREE.SphereGeometry(1.2, 12, 12);
+        const europaClickMesh = new THREE.Mesh(europaClickGeo, new THREE.MeshBasicMaterial({ visible: false }));
+        europaClickMesh.userData = { id: 'europa', clickable: true };
+        europaMesh.add(europaClickMesh);
+        clickableMeshes.push(europaClickMesh);
+
+        // Ganymede (Outer Moon)
+        const ganymedeOrbitGroup = new THREE.Group();
+        planetMesh.add(ganymedeOrbitGroup);
+
+        const ganymedeDist = 11.0;
+        const ganymedeRingGeo = new THREE.RingGeometry(ganymedeDist - 0.05, ganymedeDist + 0.05, 64);
+        const ganymedeRingMat = new THREE.MeshBasicMaterial({ color: 0xd4b896, side: THREE.DoubleSide, transparent: true, opacity: 0.25 });
+        const ganymedeRingMesh = new THREE.Mesh(ganymedeRingGeo, ganymedeRingMat);
+        ganymedeRingMesh.rotation.x = Math.PI / 2;
+        ganymedeOrbitGroup.add(ganymedeRingMesh);
+
+        const ganymedeTex = createProceduralPlanetTexture('ganymede');
+        const ganymedeMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.68, 24, 24),
+          new THREE.MeshStandardMaterial({ map: ganymedeTex, roughness: 0.6 })
+        );
+        ganymedeMesh.position.set(ganymedeDist, 0, 0);
+        ganymedeMesh.userData = { id: 'ganymede', clickable: true, radiusSize: 0.68 };
+        ganymedeOrbitGroup.add(ganymedeMesh);
+        clickableMeshes.push(ganymedeMesh);
+
+        const ganymedeClickGeo = new THREE.SphereGeometry(1.3, 12, 12);
+        const ganymedeClickMesh = new THREE.Mesh(ganymedeClickGeo, new THREE.MeshBasicMaterial({ visible: false }));
+        ganymedeClickMesh.userData = { id: 'ganymede', clickable: true };
+        ganymedeMesh.add(ganymedeClickMesh);
+        clickableMeshes.push(ganymedeClickMesh);
+
+        orbitGroup.userData.europaGroup = europaOrbitGroup;
+        orbitGroup.userData.ganymedeGroup = ganymedeOrbitGroup;
+      }
+
       if (id === 'saturn') {
         const ringGeom = new THREE.RingGeometry(r * 1.4, r * 2.3, 64);
         const ringM = new THREE.MeshBasicMaterial({ color: 0xffe082, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
         const saturnRing = new THREE.Mesh(ringGeom, ringM);
         saturnRing.rotation.x = Math.PI / 2.4;
         planetMesh.add(saturnRing);
+
+        // Titan Moon (outside Saturn's rings)
+        const titanOrbitGroup = new THREE.Group();
+        planetMesh.add(titanOrbitGroup);
+
+        const titanDist = 11.5;
+        const titanRingGeo = new THREE.RingGeometry(titanDist - 0.05, titanDist + 0.05, 64);
+        const titanRingMat = new THREE.MeshBasicMaterial({ color: 0xffb74d, side: THREE.DoubleSide, transparent: true, opacity: 0.25 });
+        const titanRingMesh = new THREE.Mesh(titanRingGeo, titanRingMat);
+        titanRingMesh.rotation.x = Math.PI / 2;
+        titanOrbitGroup.add(titanRingMesh);
+
+        const titanTex = createProceduralPlanetTexture('titan');
+        const titanMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.65, 24, 24),
+          new THREE.MeshStandardMaterial({ map: titanTex, roughness: 0.4 })
+        );
+        titanMesh.position.set(titanDist, 0, 0);
+        titanMesh.userData = { id: 'titan', clickable: true, radiusSize: 0.65 };
+        titanOrbitGroup.add(titanMesh);
+        clickableMeshes.push(titanMesh);
+
+        const titanClickGeo = new THREE.SphereGeometry(1.3, 12, 12);
+        const titanClickMesh = new THREE.Mesh(titanClickGeo, new THREE.MeshBasicMaterial({ visible: false }));
+        titanClickMesh.userData = { id: 'titan', clickable: true };
+        titanMesh.add(titanClickMesh);
+        clickableMeshes.push(titanClickMesh);
+
+        orbitGroup.userData.titanGroup = titanOrbitGroup;
       }
 
       orbitGroups.push({ group: orbitGroup, speed, mesh: planetMesh, selfSpin: 0.3 + Math.random() * 0.5 });
@@ -782,6 +983,20 @@ export default function SolarSystem3D() {
       orbitGroups.forEach(o => {
         o.group.rotation.y += dt * o.speed * 0.3;
         o.mesh.rotation.y += dt * o.selfSpin;
+
+        // Rotate Phase 1 Moons around their parent planets
+        if (o.group.userData.moonGroup) {
+          o.group.userData.moonGroup.rotation.y += dt * 1.5;
+        }
+        if (o.group.userData.europaGroup) {
+          o.group.userData.europaGroup.rotation.y += dt * 1.8;
+        }
+        if (o.group.userData.ganymedeGroup) {
+          o.group.userData.ganymedeGroup.rotation.y += dt * 1.2;
+        }
+        if (o.group.userData.titanGroup) {
+          o.group.userData.titanGroup.rotation.y += dt * 1.4;
+        }
       });
 
       asteroidInstMesh.rotation.y += dt * 0.05;
@@ -846,6 +1061,12 @@ export default function SolarSystem3D() {
             if (currentSelectedId === 'saturn') { offset = 14; baseRadius = 3.8; }
             if (currentSelectedId === 'uranus') { offset = 8; baseRadius = 2.6; }
             if (currentSelectedId === 'neptune') { offset = 8; baseRadius = 2.5; }
+
+            // Phase 1 Moons camera close-up offsets & aura sizes
+            if (['moon', 'ganymede', 'europa', 'titan'].includes(currentSelectedId)) {
+              offset = 4.2;
+              baseRadius = targetMesh.userData.radiusSize || 0.6;
+            }
 
             controls.target.lerp(worldPos, 0.06);
             controls.radius += (offset - controls.radius) * 0.05;
@@ -917,7 +1138,7 @@ export default function SolarSystem3D() {
           Tata Surya Interaktif 3D
         </h2>
         <p className="text-[#22D3EE] font-['Hanken_Grotesk'] text-xs mt-1 font-medium">
-          Klik planet, asteroid, atau komet untuk melihat detail · Drag untuk memutar · Scroll untuk zoom
+          Klik planet, bulan, asteroid, atau komet untuk melihat detail · Drag untuk memutar · Scroll/Pinch untuk zoom
         </p>
       </div>
 
