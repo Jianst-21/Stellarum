@@ -73,8 +73,8 @@ function PlanetSphere3D({ id, sizePx }) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    // Camera z position: 4.6 for Saturn to give its 3D rings generous margins on all sides without clipping
-    camera.position.z = id === 'saturn' ? 4.6 : 2.8;
+    // Camera z position: 5.8 for Saturn to give its 3D rings generous breathing room without clipping left/right edges
+    camera.position.z = id === 'saturn' ? 5.8 : 2.8;
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(width, height);
@@ -119,31 +119,9 @@ function PlanetSphere3D({ id, sizePx }) {
       material.needsUpdate = true;
     });
 
-    // Background 3D starfield particles inside sphere scene (matching Tata Surya 3D atmosphere)
-    const bgStarGeo = new THREE.BufferGeometry();
-    const bgStarCount = 45;
-    const bgStarPos = new Float32Array(bgStarCount * 3);
-    for (let i = 0; i < bgStarCount; i++) {
-      const r = 5 + Math.random() * 12;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos((Math.random() * 2) - 1);
-      bgStarPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      bgStarPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      bgStarPos[i * 3 + 2] = r * Math.cos(phi);
-    }
-    bgStarGeo.setAttribute('position', new THREE.BufferAttribute(bgStarPos, 3));
-    const bgStarMat = new THREE.PointsMaterial({
-      color: 0x22d3ee,
-      size: 1.1,
-      transparent: true,
-      opacity: 0.75,
-    });
-    const bgStarsMesh = new THREE.Points(bgStarGeo, bgStarMat);
-    scene.add(bgStarsMesh);
-
     let saturnRingMesh = null;
     if (id === 'saturn') {
-      const ringGeo = new THREE.RingGeometry(1.2, 1.85, 64);
+      const ringGeo = new THREE.RingGeometry(1.15, 1.70, 64);
       // Radial UV Mapping Fix so saturnring.jpg renders concentric ring bands
       const pos = ringGeo.attributes.position;
       const uvs = ringGeo.attributes.uv;
@@ -151,7 +129,7 @@ function PlanetSphere3D({ id, sizePx }) {
         const vx = pos.getX(i);
         const vy = pos.getY(i);
         const r = Math.sqrt(vx * vx + vy * vy);
-        const u = (r - 1.2) / (1.85 - 1.2);
+        const u = (r - 1.15) / (1.70 - 1.15);
         uvs.setXY(i, u, 0.5);
       }
       uvs.needsUpdate = true;
@@ -167,18 +145,69 @@ function PlanetSphere3D({ id, sizePx }) {
       scene.add(saturnRingMesh);
     }
 
+    // Interactive Drag-to-Rotate Mouse & Touch Controls
+    let isDragging = false;
+    let prevX = 0;
+    let prevY = 0;
+
+    const onPointerDown = (e) => {
+      isDragging = true;
+      prevX = e.clientX || (e.touches && e.touches[0].clientX);
+      prevY = e.clientY || (e.touches && e.touches[0].clientY);
+      container.style.cursor = 'grabbing';
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+      if (!clientX || !clientY) return;
+      const deltaX = clientX - prevX;
+      const deltaY = clientY - prevY;
+
+      mesh.rotation.y += deltaX * 0.012;
+      mesh.rotation.x += deltaY * 0.012;
+      if (saturnRingMesh) {
+        saturnRingMesh.rotation.z += deltaX * 0.008;
+      }
+
+      prevX = clientX;
+      prevY = clientY;
+    };
+
+    const onPointerUp = () => {
+      isDragging = false;
+      container.style.cursor = 'grab';
+    };
+
+    container.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    container.addEventListener('touchstart', onPointerDown, { passive: true });
+    window.addEventListener('touchmove', onPointerMove, { passive: true });
+    window.addEventListener('touchend', onPointerUp);
+
     let animId;
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      mesh.rotation.y += 0.008;
-      if (saturnRingMesh) saturnRingMesh.rotation.z += 0.003;
-      if (bgStarsMesh) bgStarsMesh.rotation.y += 0.001;
+      if (!isDragging) {
+        mesh.rotation.y += 0.008;
+        if (saturnRingMesh) saturnRingMesh.rotation.z += 0.003;
+      }
       renderer.render(scene, camera);
     };
     animate();
 
     return () => {
       cancelAnimationFrame(animId);
+      container.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('mouseup', onPointerUp);
+      container.removeEventListener('touchstart', onPointerDown);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+
       if (renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
@@ -186,8 +215,6 @@ function PlanetSphere3D({ id, sizePx }) {
       renderer.dispose();
       geo.dispose();
       material.dispose();
-      bgStarGeo.dispose();
-      bgStarMat.dispose();
       scene.clear();
     };
   }, [id, sizePx]);
