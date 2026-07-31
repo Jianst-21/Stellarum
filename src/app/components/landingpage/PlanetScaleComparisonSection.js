@@ -30,8 +30,28 @@ const PLANET_COLORS = {
   moon: 0x9e9e9e,
 };
 
+// Global Texture Cache for high performance (prevents re-downloading)
+const globalTextureLoader = new THREE.TextureLoader();
+const textureMapCache = new Map();
+
+function getCachedTexture(id, callback) {
+  if (textureMapCache.has(id)) {
+    callback(textureMapCache.get(id));
+    return;
+  }
+  const texturePath = `/textures/planets/${id}.jpg`;
+  globalTextureLoader.load(
+    texturePath,
+    (tex) => {
+      textureMapCache.set(id, tex);
+      callback(tex);
+    },
+    undefined,
+    () => {}
+  );
+}
+
 // Helper for Perceptual Logarithmic 3D Showcase Scaling
-// Prevents tiny planets from collapsing to identical min dots when compared to Sun
 const getLogScalePx = (diameterKm, minPx = 65, maxPx = 135) => {
   const minLog = Math.log(3474);     // Moon
   const maxLog = Math.log(1392700);  // Sun
@@ -40,7 +60,7 @@ const getLogScalePx = (diameterKm, minPx = 65, maxPx = 135) => {
   return Math.round(minPx + ratio * (maxPx - minPx));
 };
 
-// Interactive 3D Sphere Renderer with NASA texture
+// Lightweight 3D Sphere Renderer with NASA texture and thorough WebGL cleanup
 function PlanetSphere3D({ id, sizePx }) {
   const containerRef = useRef(null);
 
@@ -52,13 +72,12 @@ function PlanetSphere3D({ id, sizePx }) {
     const height = sizePx;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-    // Move camera back for Saturn so its 3D rings never get clipped/cut off at top/bottom
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.z = id === 'saturn' ? 3.6 : 2.8;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -76,7 +95,8 @@ function PlanetSphere3D({ id, sizePx }) {
       scene.add(fillLight);
     }
 
-    const geo = new THREE.SphereGeometry(1, 48, 48);
+    // Geometry (32x32 for high FPS performance)
+    const geo = new THREE.SphereGeometry(1, 32, 32);
     const baseColor = PLANET_COLORS[id] || 0xcccccc;
 
     let material;
@@ -92,23 +112,17 @@ function PlanetSphere3D({ id, sizePx }) {
     const mesh = new THREE.Mesh(geo, material);
     scene.add(mesh);
 
-    const textureLoader = new THREE.TextureLoader();
-    const texturePath = `/textures/planets/${id}.jpg`;
-    textureLoader.load(
-      texturePath,
-      (loadedTex) => {
-        material.map = loadedTex;
-        material.needsUpdate = true;
-      },
-      undefined,
-      (err) => console.warn(`Base color used for ${id}:`, err)
-    );
+    // Apply Cached Texture
+    getCachedTexture(id, (loadedTex) => {
+      material.map = loadedTex;
+      material.needsUpdate = true;
+    });
 
     let saturnRingMesh = null;
     if (id === 'saturn') {
-      const ringGeo = new THREE.RingGeometry(1.15, 1.75, 64);
+      const ringGeo = new THREE.RingGeometry(1.15, 1.75, 48);
       const ringMat = new THREE.MeshBasicMaterial({
-        map: textureLoader.load('/textures/planets/saturnring.jpg'),
+        map: globalTextureLoader.load('/textures/planets/saturnring.jpg'),
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.85,
@@ -132,9 +146,11 @@ function PlanetSphere3D({ id, sizePx }) {
       if (renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
+      renderer.forceContextLoss();
       renderer.dispose();
       geo.dispose();
       material.dispose();
+      scene.clear();
     };
   }, [id, sizePx]);
 
@@ -155,21 +171,17 @@ export default function PlanetScaleComparisonSection() {
   const [rightId, setRightId] = useState('earth');
 
   // Sorting Lineup State
-  const [sortCriteria, setSortCriteria] = useState('diameterDesc'); // 'diameterDesc' | 'distAsc' | 'tempDesc'
+  const [sortCriteria, setSortCriteria] = useState('diameterDesc');
 
   // Sorting Quiz State
-  const [quizItems, setQuizItems] = useState([]);
   const [userOrder, setUserOrder] = useState([]);
   const [quizChecked, setQuizChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [scoreCount, setScoreCount] = useState(0);
 
-  // Initialize random Quiz items
   const generateQuiz = () => {
     const shuffled = [...CELESTIAL_BODIES].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 4);
-    setQuizItems(selected);
-    // Initial random user order
     setUserOrder([...selected].sort(() => 0.5 - Math.random()));
     setQuizChecked(false);
     setIsCorrect(false);
@@ -189,7 +201,6 @@ export default function PlanetScaleComparisonSection() {
   };
 
   const checkQuizAnswer = () => {
-    // Check if userOrder is correctly sorted from largest diameter to smallest
     let correct = true;
     for (let i = 0; i < userOrder.length - 1; i++) {
       if (userOrder[i].diameterKm < userOrder[i + 1].diameterKm) {
@@ -202,7 +213,6 @@ export default function PlanetScaleComparisonSection() {
     if (correct) setScoreCount((prev) => prev + 1);
   };
 
-  // 1-on-1 calculations
   const leftObj = CELESTIAL_BODIES.find((b) => b.id === leftId);
   const rightObj = CELESTIAL_BODIES.find((b) => b.id === rightId);
   const maxDiameter = Math.max(leftObj.diameterKm, rightObj.diameterKm);
@@ -211,7 +221,6 @@ export default function PlanetScaleComparisonSection() {
   const timesLarger = (leftObj.diameterKm / rightObj.diameterKm).toFixed(1);
   const isLeftLarger = leftObj.diameterKm >= rightObj.diameterKm;
 
-  // Sorted list for Lineup tab
   const getSortedLineup = () => {
     const list = [...CELESTIAL_BODIES];
     if (sortCriteria === 'diameterDesc') return list.sort((a, b) => b.diameterKm - a.diameterKm);
@@ -256,7 +265,7 @@ export default function PlanetScaleComparisonSection() {
           Eksplorasi Skala & Game Urutan Kosmik
         </h2>
         <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
-          Bandingkan ukuran planet secara 3D, urutkan barisan kosmik, dan uji pengetahuanmu dalam mini-game tantangan urutan planet!
+          Bandingkan ukuran planet secara 3D, urutkan barisan kosmik, dan uji pengetahuanmu dalam mini-game tantangan urutan planet.
         </p>
       </div>
 
@@ -307,7 +316,6 @@ export default function PlanetScaleComparisonSection() {
       {/* TAB 1: 1-VS-1 COMPARE */}
       {activeTab === 'compare' && (
         <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
-          {/* Selectors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
@@ -352,7 +360,6 @@ export default function PlanetScaleComparisonSection() {
             </div>
           </div>
 
-          {/* 3D Arena */}
           <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-6 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-around gap-8 min-h-[360px] relative overflow-hidden">
             <div className="flex flex-col items-center justify-center flex-1 text-center group">
               <div className="h-60 flex items-center justify-center relative w-full">
@@ -424,7 +431,6 @@ export default function PlanetScaleComparisonSection() {
       {/* TAB 2: LINEUP & SORTING 3D */}
       {activeTab === 'lineup' && (
         <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
-          {/* Filter Bar & Carousel Controls */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800">
             <div>
               <h3 className="text-xl font-bold text-white">Barisan Benda Kosmik 3D</h3>
@@ -439,13 +445,12 @@ export default function PlanetScaleComparisonSection() {
                   onChange={(e) => setSortCriteria(e.target.value)}
                   className="bg-slate-950 border border-purple-500/40 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none cursor-pointer"
                 >
-                  <option value="diameterDesc">📏 Ukuran Diameter (Terbesar → Terkecil)</option>
-                  <option value="distAsc">☀️ Jarak dari Matahari (Terdekat → Terjauh)</option>
-                  <option value="tempDesc">🔥 Suhu Rata-Rata (Terpanas → Terdingin)</option>
+                  <option value="diameterDesc">Ukuran Diameter (Terbesar ke Terkecil)</option>
+                  <option value="distAsc">Jarak dari Matahari (Terdekat ke Terjauh)</option>
+                  <option value="tempDesc">Suhu Rata-Rata (Terpanas ke Terdingin)</option>
                 </select>
               </div>
 
-              {/* Carousel Navigation Buttons */}
               <div className="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 shadow-md">
                 <button
                   onClick={prevLineupPage}
@@ -468,7 +473,6 @@ export default function PlanetScaleComparisonSection() {
             </div>
           </div>
 
-          {/* 4 Items Showcase Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-h-[320px] items-stretch">
             {currentVisibleBodies.map((b, idxInPage) => {
               const globalRank = lineupPageIndex * itemsPerPage + idxInPage + 1;
@@ -510,7 +514,7 @@ export default function PlanetScaleComparisonSection() {
               Urutkan dari Terbesar ke Terkecil!
             </h3>
             <p className="text-gray-400 text-xs md:text-sm mt-1">
-              Gunakan tombol panah ⬆ ⬇ untuk menyusun 4 benda langit 3D di bawah ini dari yang paling besar hingga paling kecil.
+              Gunakan tombol panah Kiri / Kanan pada tiap kartu untuk menyusun 4 benda langit 3D di bawah ini dari yang paling besar hingga paling kecil.
             </p>
           </div>
 
@@ -533,7 +537,7 @@ export default function PlanetScaleComparisonSection() {
                     className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700 text-gray-300 disabled:opacity-30 hover:bg-amber-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
                     title="Geser Kiri"
                   >
-                    ◀
+                    <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => moveQuizItem(idx, idx + 1)}
@@ -541,7 +545,7 @@ export default function PlanetScaleComparisonSection() {
                     className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700 text-gray-300 disabled:opacity-30 hover:bg-amber-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
                     title="Geser Kanan"
                   >
-                    ▶
+                    <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
 
@@ -552,7 +556,6 @@ export default function PlanetScaleComparisonSection() {
                 <h4 className="text-base font-bold text-white mt-2">{item.name}</h4>
                 <p className="text-xs text-gray-400 mt-0.5">{item.category}</p>
 
-                {/* Show actual diameter after answer checked */}
                 {quizChecked && (
                   <span className="text-xs font-semibold text-amber-300 mt-2 px-2.5 py-1 rounded-md bg-amber-950/60 border border-amber-500/30">
                     {item.diameterKm.toLocaleString('id-ID')} km
@@ -562,7 +565,6 @@ export default function PlanetScaleComparisonSection() {
             ))}
           </div>
 
-          {/* Quiz Actions & Result Feedback */}
           <div className="flex flex-col items-center gap-4 border-t border-slate-800 pt-6">
             {!quizChecked ? (
               <button
@@ -582,7 +584,7 @@ export default function PlanetScaleComparisonSection() {
                   {isCorrect ? (
                     <>
                       <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <span>Hebat! Urutanmu Benar Presisi dari Terbesar ke Terkecil! 🎉</span>
+                      <span>Hebat! Urutanmu Benar Presisi dari Terbesar ke Terkecil!</span>
                     </>
                   ) : (
                     <>
