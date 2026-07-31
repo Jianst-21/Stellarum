@@ -100,6 +100,36 @@ const OBJECT_DATA = {
     desc: "Satelit terbesar Saturnus dan satu-satunya bulan di Tata Surya yang memiliki atmosfer tebal serta cairan di permukaannya.",
     distance: "1,22 juta km (dari Saturnus)", size: "5.149 km",
     more: "Atmsofer Titan didominasi gas nitrogen. Di permukaannya terdapat danau dan sungai yang mengalirkan metana dan etana cair dalam siklus cuaca hidrokarbon yang mirip dengan siklus air di Bumi."
+  },
+  phobos: {
+    name: "Phobos", type: "SATELIT ALAMI (MARS)",
+    desc: "Satelit terbesar Mars yang berbentuk tidak beraturan (kentang batu), mengorbit sangat dekat dengan permukaan Mars.",
+    distance: "9.377 km (dari Mars)", size: "22,5 km",
+    more: "Phobos mengorbit Mars 3 kali sehari dan bergerak semakin dekat ke Mars sekitar 1,8 meter setiap 100 tahun. Diprediksi dalam 50 juta tahun Phobos akan hancur menjadi cincin di sekeliling Mars."
+  },
+  deimos: {
+    name: "Deimos", type: "SATELIT ALAMI (MARS)",
+    desc: "Satelit terluar Mars yang lebih kecil dan halus, diselimuti lapisan regolit tebal.",
+    distance: "23.460 km (dari Mars)", size: "12,4 km",
+    more: "Deimos memiliki orbit yang jauh lebih stabil daripada Phobos. Ukurannya yang sangat kecil dan gravitasinya yang amat lemah membuat seseorang bisa melompat lepas dari permukaannya dengan menggunakan sepeda."
+  },
+  ceres: {
+    name: "Ceres", type: "PLANET KERDIL (SABUK ASTEROID)",
+    desc: "Objek terbesar di Sabuk Asteroid dan satu-satunya planet kerdil yang berada di Tata Surya bagian dalam.",
+    distance: "413,7 juta km", size: "940 km",
+    more: "Ceres menyumbang sekitar sepertiga dari total massa seluruh Sabuk Asteroid. Permukaannya mengandung es air dan titik-titik terang kaya garam karbonat (seperti Kawah Occator) yang berkilau di bawah sinar Matahari."
+  },
+  eris: {
+    name: "Eris", type: "PLANET KERDIL (SABUK KUIPER)",
+    desc: "Planet kerdil terbesar kedua di luar orbit Neptunus, yang penemuannya memicu redefinisi status Pluto pada 2006.",
+    distance: "10,12 miliar km", size: "2.326 km",
+    more: "Eris mengorbit Matahari dalam jalur miring ekstrem (inklinasi 30°). Permukaannya yang sangat dingin (-240°C) diselimuti es nitrogen murni yang memantulkan hampir 96% sinar Matahari."
+  },
+  kuiperbelt: {
+    name: "Sabuk Kuiper", type: "WILAYAH ES OUTDOOR",
+    desc: "Cincin raksasa berisi triliunan objek es, planet kerdil, dan komet di luar orbit Neptunus.",
+    distance: "4,5–7,5 miliar km", size: "Lebar ±3 miliar km",
+    more: "Sabuk Kuiper jauh lebih luas dan 20 kali lebih masif daripada Sabuk Asteroid. Wilayah ini menjadi rumah bagi planet-planet kerdil es seperti Pluto, Eris, Haumea, dan Makemake, serta asal dari komet periode pendek."
   }
 };
 
@@ -120,6 +150,11 @@ const AURA_COLORS = {
   ganymede: 0xd4b896,
   europa: 0x80deea,
   titan: 0xffb74d,
+  phobos: 0xd7ccc8,
+  deimos: 0xefebe9,
+  ceres: 0x80cbc4,
+  eris: 0xe0f7fa,
+  kuiperbelt: 0x00bcd4,
 };
 
 // Helper function to create seamless 360-degree Sun texture
@@ -367,6 +402,51 @@ function createProceduralPlanetTexture(id) {
     for (let i = 0; i < 20; i++) {
       ctx.fillStyle = 'rgba(255, 236, 179, 0.2)';
       ctx.fillRect(0, Math.random() * height, width, 6 + Math.random() * 12);
+    }
+  } else if (id === 'phobos') {
+    ctx.fillStyle = '#6d6d6d';
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 120; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, 2 + Math.random() * 6, 0, Math.PI * 2);
+      ctx.fillStyle = Math.random() > 0.5 ? '#424242' : '#8c8c8c';
+      ctx.fill();
+    }
+  } else if (id === 'deimos') {
+    ctx.fillStyle = '#9e9e9e';
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 100; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, 2 + Math.random() * 5, 0, Math.PI * 2);
+      ctx.fillStyle = Math.random() > 0.5 ? '#757575' : '#bdbdbd';
+      ctx.fill();
+    }
+  } else if (id === 'ceres') {
+    ctx.fillStyle = '#78909c';
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 150; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, 2 + Math.random() * 7, 0, Math.PI * 2);
+      ctx.fillStyle = Math.random() > 0.4 ? '#546e7a' : '#90a4ae';
+      ctx.fill();
+    }
+    // Occator crater bright spots
+    ctx.beginPath();
+    ctx.arc(width * 0.4, height * 0.45, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+  } else if (id === 'eris') {
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    grad.addColorStop(0, '#e0f7fa');
+    grad.addColorStop(0.5, '#b2ebf2');
+    grad.addColorStop(1, '#80deea');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 80; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, 1 + Math.random() * 4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fill();
     }
   } else {
     ctx.fillStyle = '#c7b299';
@@ -644,6 +724,65 @@ export default function SolarSystem3D() {
         orbitGroup.userData.moonGroup = moonOrbitGroup;
       }
 
+      if (id === 'mars') {
+        // Phobos Moon
+        const phobosOrbitGroup = new THREE.Group();
+        planetMesh.add(phobosOrbitGroup);
+
+        const phobosDist = 2.4;
+        const phobosRingGeo = new THREE.RingGeometry(phobosDist - 0.03, phobosDist + 0.03, 48);
+        const phobosRingMat = new THREE.MeshBasicMaterial({ color: 0xd7ccc8, side: THREE.DoubleSide, transparent: true, opacity: 0.2 });
+        const phobosRingMesh = new THREE.Mesh(phobosRingGeo, phobosRingMat);
+        phobosRingMesh.rotation.x = Math.PI / 2;
+        phobosOrbitGroup.add(phobosRingMesh);
+
+        const phobosTex = createProceduralPlanetTexture('phobos');
+        const phobosMesh = new THREE.Mesh(
+          new THREE.DodecahedronGeometry(0.22, 1),
+          new THREE.MeshStandardMaterial({ map: phobosTex, roughness: 0.8 })
+        );
+        phobosMesh.position.set(phobosDist, 0, 0);
+        phobosMesh.userData = { id: 'phobos', clickable: true, radiusSize: 0.22 };
+        phobosOrbitGroup.add(phobosMesh);
+        clickableMeshes.push(phobosMesh);
+
+        const phobosClickGeo = new THREE.SphereGeometry(0.8, 12, 12);
+        const phobosClickMesh = new THREE.Mesh(phobosClickGeo, new THREE.MeshBasicMaterial({ visible: false }));
+        phobosClickMesh.userData = { id: 'phobos', clickable: true };
+        phobosMesh.add(phobosClickMesh);
+        clickableMeshes.push(phobosClickMesh);
+
+        // Deimos Moon
+        const deimosOrbitGroup = new THREE.Group();
+        planetMesh.add(deimosOrbitGroup);
+
+        const deimosDist = 3.6;
+        const deimosRingGeo = new THREE.RingGeometry(deimosDist - 0.03, deimosDist + 0.03, 48);
+        const deimosRingMat = new THREE.MeshBasicMaterial({ color: 0xefebe9, side: THREE.DoubleSide, transparent: true, opacity: 0.2 });
+        const deimosRingMesh = new THREE.Mesh(deimosRingGeo, deimosRingMat);
+        deimosRingMesh.rotation.x = Math.PI / 2;
+        deimosOrbitGroup.add(deimosRingMesh);
+
+        const deimosTex = createProceduralPlanetTexture('deimos');
+        const deimosMesh = new THREE.Mesh(
+          new THREE.DodecahedronGeometry(0.16, 1),
+          new THREE.MeshStandardMaterial({ map: deimosTex, roughness: 0.8 })
+        );
+        deimosMesh.position.set(deimosDist, 0, 0);
+        deimosMesh.userData = { id: 'deimos', clickable: true, radiusSize: 0.16 };
+        deimosOrbitGroup.add(deimosMesh);
+        clickableMeshes.push(deimosMesh);
+
+        const deimosClickGeo = new THREE.SphereGeometry(0.7, 12, 12);
+        const deimosClickMesh = new THREE.Mesh(deimosClickGeo, new THREE.MeshBasicMaterial({ visible: false }));
+        deimosClickMesh.userData = { id: 'deimos', clickable: true };
+        deimosMesh.add(deimosClickMesh);
+        clickableMeshes.push(deimosClickMesh);
+
+        orbitGroup.userData.phobosGroup = phobosOrbitGroup;
+        orbitGroup.userData.deimosGroup = deimosOrbitGroup;
+      }
+
       if (id === 'jupiter') {
         // Europa (Inner Moon)
         const europaOrbitGroup = new THREE.Group();
@@ -795,6 +934,91 @@ export default function SolarSystem3D() {
     beltClickRing.userData = { id: 'asteroidbelt', clickable: true };
     scene.add(beltClickRing);
     clickableMeshes.push(beltClickRing);
+
+    // --- PHASE 2: CERES (Dwarf Planet in Asteroid Belt) ---
+    const ceresOrbitGroup = new THREE.Group();
+    scene.add(ceresOrbitGroup);
+
+    const ceresDist = 50.5;
+    const ceresRingGeo = new THREE.RingGeometry(ceresDist - 0.06, ceresDist + 0.06, 128);
+    const ceresRingMat = new THREE.MeshBasicMaterial({ color: 0x80cbc4, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
+    const ceresRingMesh = new THREE.Mesh(ceresRingGeo, ceresRingMat);
+    ceresRingMesh.rotation.x = Math.PI / 2;
+    scene.add(ceresRingMesh);
+
+    const ceresTex = createProceduralPlanetTexture('ceres');
+    const ceresMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.45, 24, 24),
+      new THREE.MeshStandardMaterial({ map: ceresTex, roughness: 0.7 })
+    );
+    ceresMesh.position.set(ceresDist, 0, 0);
+    ceresMesh.userData = { id: 'ceres', clickable: true, radiusSize: 0.45 };
+    ceresOrbitGroup.add(ceresMesh);
+    clickableMeshes.push(ceresMesh);
+
+    const ceresClickGeo = new THREE.SphereGeometry(1.2, 12, 12);
+    const ceresClickMesh = new THREE.Mesh(ceresClickGeo, new THREE.MeshBasicMaterial({ visible: false }));
+    ceresClickMesh.userData = { id: 'ceres', clickable: true };
+    ceresMesh.add(ceresClickMesh);
+    clickableMeshes.push(ceresClickMesh);
+
+    // --- PHASE 2: KUIPER BELT & ERIS ---
+    const kuiperGroup = new THREE.Group();
+    scene.add(kuiperGroup);
+    const kuiperParticleCount = 400;
+    const kuiperGeo = new THREE.DodecahedronGeometry(0.3, 0);
+    const kuiperMat = new THREE.MeshStandardMaterial({ color: 0x80deea, roughness: 0.4, emissive: 0x00bcd4, emissiveIntensity: 0.15 });
+    const kuiperInstMesh = new THREE.InstancedMesh(kuiperGeo, kuiperMat, kuiperParticleCount);
+    const kuiperDummy = new THREE.Object3D();
+    const kuiperInnerR = 135, kuiperOuterR = 160;
+    for (let i = 0; i < kuiperParticleCount; i++) {
+      const r = kuiperInnerR + Math.random() * (kuiperOuterR - kuiperInnerR);
+      const theta = Math.random() * Math.PI * 2;
+      const y = (Math.random() - 0.5) * 3.0;
+      kuiperDummy.position.set(r * Math.cos(theta), y, r * Math.sin(theta));
+      kuiperDummy.scale.setScalar(0.4 + Math.random() * 0.8);
+      kuiperDummy.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
+      kuiperDummy.updateMatrix();
+      kuiperInstMesh.setMatrixAt(i, kuiperDummy.matrix);
+    }
+    kuiperInstMesh.userData = { id: 'kuiperbelt', clickable: true };
+    scene.add(kuiperInstMesh);
+    clickableMeshes.push(kuiperInstMesh);
+
+    const kuiperClickTorusGeo = new THREE.TorusGeometry(147.5, 10.0, 16, 64);
+    const kuiperClickRing = new THREE.Mesh(kuiperClickTorusGeo, new THREE.MeshBasicMaterial({ visible: false }));
+    kuiperClickRing.rotation.x = Math.PI / 2;
+    kuiperClickRing.userData = { id: 'kuiperbelt', clickable: true };
+    scene.add(kuiperClickRing);
+    clickableMeshes.push(kuiperClickRing);
+
+    // Eris (Inclined Outer Dwarf Planet)
+    const erisOrbitGroup = new THREE.Group();
+    erisOrbitGroup.rotation.x = Math.PI / 6; // 30° orbital tilt
+    scene.add(erisOrbitGroup);
+
+    const erisDist = 152;
+    const erisRingGeo = new THREE.RingGeometry(erisDist - 0.08, erisDist + 0.08, 128);
+    const erisRingMat = new THREE.MeshBasicMaterial({ color: 0xe0f7fa, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
+    const erisRingMesh = new THREE.Mesh(erisRingGeo, erisRingMat);
+    erisRingMesh.rotation.x = Math.PI / 2;
+    erisOrbitGroup.add(erisRingMesh);
+
+    const erisTex = createProceduralPlanetTexture('eris');
+    const erisMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.52, 24, 24),
+      new THREE.MeshStandardMaterial({ map: erisTex, roughness: 0.4 })
+    );
+    erisMesh.position.set(erisDist, 0, 0);
+    erisMesh.userData = { id: 'eris', clickable: true, radiusSize: 0.52 };
+    erisOrbitGroup.add(erisMesh);
+    clickableMeshes.push(erisMesh);
+
+    const erisClickGeo = new THREE.SphereGeometry(1.4, 12, 12);
+    const erisClickMesh = new THREE.Mesh(erisClickGeo, new THREE.MeshBasicMaterial({ visible: false }));
+    erisClickMesh.userData = { id: 'eris', clickable: true };
+    erisMesh.add(erisClickMesh);
+    clickableMeshes.push(erisClickMesh);
 
     // Inclined Comet Orbit
     const cometOrbitGroup = new THREE.Group();
@@ -984,9 +1208,15 @@ export default function SolarSystem3D() {
         o.group.rotation.y += dt * o.speed * 0.3;
         o.mesh.rotation.y += dt * o.selfSpin;
 
-        // Rotate Phase 1 Moons around their parent planets
+        // Rotate Moons around parent planets
         if (o.group.userData.moonGroup) {
           o.group.userData.moonGroup.rotation.y += dt * 1.5;
+        }
+        if (o.group.userData.phobosGroup) {
+          o.group.userData.phobosGroup.rotation.y += dt * 2.8;
+        }
+        if (o.group.userData.deimosGroup) {
+          o.group.userData.deimosGroup.rotation.y += dt * 1.5;
         }
         if (o.group.userData.europaGroup) {
           o.group.userData.europaGroup.rotation.y += dt * 1.8;
@@ -998,6 +1228,11 @@ export default function SolarSystem3D() {
           o.group.userData.titanGroup.rotation.y += dt * 1.4;
         }
       });
+
+      // Rotate Phase 2 objects
+      ceresOrbitGroup.rotation.y += dt * 0.28;
+      erisOrbitGroup.rotation.y += dt * 0.1;
+      kuiperInstMesh.rotation.y += dt * 0.02;
 
       asteroidInstMesh.rotation.y += dt * 0.05;
 
@@ -1040,6 +1275,13 @@ export default function SolarSystem3D() {
           selectionAuraMesh.position.set(0, 0, 0);
           const beltScale = 51 + Math.sin(time * 3) * 0.5;
           selectionAuraMesh.scale.set(beltScale, beltScale, beltScale);
+        } else if (currentSelectedId === 'kuiperbelt') {
+          controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.05);
+          controls.radius += (260 - controls.radius) * 0.05;
+
+          selectionAuraMesh.position.set(0, 0, 0);
+          const kuiperScale = 147 + Math.sin(time * 3) * 1.0;
+          selectionAuraMesh.scale.set(kuiperScale, kuiperScale, kuiperScale);
         } else if (currentSelectedId === 'comet') {
           controls.target.lerp(cometWorldPos, 0.08);
           controls.radius += (8 - controls.radius) * 0.05;
@@ -1062,10 +1304,14 @@ export default function SolarSystem3D() {
             if (currentSelectedId === 'uranus') { offset = 8; baseRadius = 2.6; }
             if (currentSelectedId === 'neptune') { offset = 8; baseRadius = 2.5; }
 
-            // Phase 1 Moons camera close-up offsets & aura sizes
-            if (['moon', 'ganymede', 'europa', 'titan'].includes(currentSelectedId)) {
+            // Phase 1 & 2 objects camera close-up offsets & aura sizes
+            if (['moon', 'ganymede', 'europa', 'titan', 'ceres', 'eris'].includes(currentSelectedId)) {
               offset = 4.2;
               baseRadius = targetMesh.userData.radiusSize || 0.6;
+            }
+            if (['phobos', 'deimos'].includes(currentSelectedId)) {
+              offset = 3.2;
+              baseRadius = targetMesh.userData.radiusSize || 0.3;
             }
 
             controls.target.lerp(worldPos, 0.06);
