@@ -6,7 +6,7 @@ import HeroSection from '@/app/components/landingpage/HeroSection';
 import SolarSystemSection from '@/app/components/landingpage/SolarSystemSection';
 import FunFactsSection from '@/app/components/landingpage/FunFactsSection';
 import PlanetExplorationSection from '@/app/components/landingpage/PlanetExplorationSection';
-import NewsletterSection from '@/app/components/landingpage/NewsletterSection';
+import SpaceTriviaQuizSection from '@/app/components/landingpage/SpaceTriviaQuizSection';
 
 export const metadata = {
   title: 'Stellarum — Portal Eksplorasi Astronomi & Tata Surya',
@@ -28,7 +28,7 @@ export default function LandingPage() {
         <SolarSystemSection />
         <FunFactsSection />
         <PlanetExplorationSection />
-        <NewsletterSection />
+        <SpaceTriviaQuizSection />
       </main>
 
       {/* Footer at z-20 */}
