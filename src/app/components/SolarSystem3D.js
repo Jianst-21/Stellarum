@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { X, ChevronDown, ChevronUp, Lock, Unlock } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Lock, Unlock, Play, Pause, Gauge, Film } from 'lucide-react';
 
 const OBJECT_DATA = {
   sun: {
@@ -577,10 +577,18 @@ export default function SolarSystem3D() {
   const selectedIdRef = useRef(null);
   const isResettingZoomRef = useRef(false);
   const isTouch3DModeRef = useRef(true);
+  const isPausedRef = useRef(false);
+  const orbitSpeedRef = useRef(1);
+  const isCinematicRef = useRef(false);
+  const orbitRingMeshesRef = useRef([]);
+
   const [selectedId, setSelectedId] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isTouch3DMode, setIsTouch3DMode] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [orbitSpeed, setOrbitSpeed] = useState(1);
+  const [isCinematic, setIsCinematic] = useState(false);
 
   const toggleTouch3DMode = () => {
     const nextMode = !isTouch3DMode;
@@ -589,6 +597,27 @@ export default function SolarSystem3D() {
     if (domElemRef.current) {
       domElemRef.current.style.touchAction = nextMode ? 'none' : 'pan-y';
     }
+  };
+
+  const togglePause = () => {
+    const next = !isPausedRef.current;
+    isPausedRef.current = next;
+    setIsPaused(next);
+  };
+
+  const cycleSpeed = () => {
+    const speeds = [1, 2, 5];
+    const cur = speeds.indexOf(orbitSpeedRef.current);
+    const next = speeds[(cur + 1) % speeds.length];
+    orbitSpeedRef.current = next;
+    setOrbitSpeed(next);
+  };
+
+  const toggleCinematic = () => {
+    const next = !isCinematicRef.current;
+    isCinematicRef.current = next;
+    setIsCinematic(next);
+    orbitRingMeshesRef.current.forEach(m => { m.visible = !next; });
   };
 
   const domElemRef = useRef(null);
@@ -743,14 +772,14 @@ export default function SolarSystem3D() {
     domElem.addEventListener('wheel', handleWheel, { passive: false });
     domElem.style.touchAction = isTouch3DModeRef.current ? 'none' : 'pan-y';
 
-    // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 2.5);
+    // Lights — reduced ambient so planet day/night shading is visible
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambient);
 
-    const sunLight = new THREE.PointLight(0xfff5ea, 5.0, 4000);
+    const sunLight = new THREE.PointLight(0xfff5ea, 8.0, 4000);
     scene.add(sunLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
     fillLight.position.set(50, 120, 80);
     scene.add(fillLight);
 
@@ -824,14 +853,16 @@ export default function SolarSystem3D() {
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
       ringMesh.rotation.x = Math.PI / 2;
       scene.add(ringMesh);
+      orbitRingMeshesRef.current.push(ringMesh);
 
       const planetGeo = new THREE.SphereGeometry(r, 32, 32);
       const pTex = createProceduralPlanetTexture(id);
 
-      const planetMat = new THREE.MeshStandardMaterial({
+      // MeshPhongMaterial gives realistic sun-side bright / dark-side shading
+      const planetMat = new THREE.MeshPhongMaterial({
         map: pTex,
-        roughness: 0.6,
-        metalness: 0.0,
+        shininess: 8,
+        specular: new THREE.Color(0x222244),
       });
       const planetMesh = new THREE.Mesh(planetGeo, planetMat);
       planetMesh.position.set(dist, 0, 0);
@@ -1384,47 +1415,49 @@ export default function SolarSystem3D() {
       const dt = clock.getDelta();
       const time = clock.getElapsedTime();
 
-      sunMesh.rotation.y += dt * 0.2;
+      // Respect pause & speed controls
+      const eff = isPausedRef.current ? 0 : dt * orbitSpeedRef.current;
+
+      sunMesh.rotation.y += dt * 0.2; // sun always rotates for aesthetics
 
       orbitGroups.forEach(o => {
-        o.group.rotation.y += dt * o.speed * 0.3;
-        o.mesh.rotation.y += dt * o.selfSpin;
+        o.group.rotation.y += eff * o.speed * 0.3;
+        o.mesh.rotation.y += eff * o.selfSpin;
 
-        // Rotate Moons and Spacecraft around parent planets
         if (o.group.userData.moonGroup) {
-          o.group.userData.moonGroup.rotation.y += dt * 1.5;
+          o.group.userData.moonGroup.rotation.y += eff * 1.5;
         }
         if (o.group.userData.jwstGroup) {
-          o.group.userData.jwstGroup.rotation.y += dt * 0.9;
+          o.group.userData.jwstGroup.rotation.y += eff * 0.9;
         }
         if (o.group.userData.phobosGroup) {
-          o.group.userData.phobosGroup.rotation.y += dt * 2.8;
+          o.group.userData.phobosGroup.rotation.y += eff * 2.8;
         }
         if (o.group.userData.deimosGroup) {
-          o.group.userData.deimosGroup.rotation.y += dt * 1.5;
+          o.group.userData.deimosGroup.rotation.y += eff * 1.5;
         }
         if (o.group.userData.europaGroup) {
-          o.group.userData.europaGroup.rotation.y += dt * 1.8;
+          o.group.userData.europaGroup.rotation.y += eff * 1.8;
         }
         if (o.group.userData.ganymedeGroup) {
-          o.group.userData.ganymedeGroup.rotation.y += dt * 1.2;
+          o.group.userData.ganymedeGroup.rotation.y += eff * 1.2;
         }
         if (o.group.userData.titanGroup) {
-          o.group.userData.titanGroup.rotation.y += dt * 1.4;
+          o.group.userData.titanGroup.rotation.y += eff * 1.4;
         }
       });
 
       // Rotate Phase 2 & 3 objects
-      ceresOrbitGroup.rotation.y += dt * 0.28;
-      erisOrbitGroup.rotation.y += dt * 0.1;
-      kuiperInstMesh.rotation.y += dt * 0.02;
-      voyagerOrbitGroup.rotation.y += dt * 0.04;
-      voyagerMesh.rotation.y += dt * 0.2;
+      ceresOrbitGroup.rotation.y += eff * 0.28;
+      erisOrbitGroup.rotation.y += eff * 0.1;
+      kuiperInstMesh.rotation.y += eff * 0.02;
+      voyagerOrbitGroup.rotation.y += eff * 0.04;
+      voyagerMesh.rotation.y += eff * 0.2;
 
-      asteroidInstMesh.rotation.y += dt * 0.05;
+      asteroidInstMesh.rotation.y += eff * 0.05;
 
       // Comet Orbit Motion
-      cometT += dt * 0.08;
+      cometT += eff * 0.08;
       const cx = -40 + Math.cos(cometT) * 190;
       const cz = Math.sin(cometT) * 100;
       cometGroup.position.set(cx, 0, cz);
@@ -1565,8 +1598,8 @@ export default function SolarSystem3D() {
       {/* 3D Canvas mount */}
       <div ref={mountRef} className="w-full h-full" />
 
-      {/* HUD Top Header & Mobile Touch Toggle */}
-      <div className="absolute top-0 left-0 w-full p-4 sm:p-6 pointer-events-none z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* HUD Top Header & Controls */}
+      <div className="absolute top-0 left-0 w-full p-4 sm:p-6 pointer-events-none z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div>
           <h2 className="text-[#ffffff] font-['Sora'] text-base sm:text-xl font-semibold tracking-wide shadow-sm">
             Tata Surya Interaktif 3D
@@ -1576,28 +1609,63 @@ export default function SolarSystem3D() {
           </p>
         </div>
 
-        {/* Mobile & Tablet Toggle Button for Page Scroll vs 3D Orbit (Hidden on Desktop) */}
-        <button
-          onClick={toggleTouch3DMode}
-          className="md:hidden pointer-events-auto self-start sm:self-auto px-3.5 py-1.5 rounded-full text-xs font-bold font-['Geist'] border transition-all cursor-pointer shadow-lg backdrop-blur-sm flex items-center gap-2"
-          style={{
-            backgroundColor: isTouch3DMode ? 'rgba(34, 211, 238, 0.15)' : 'rgba(255, 255, 255, 0.1)',
-            borderColor: isTouch3DMode ? '#22D3EE' : 'rgba(255, 255, 255, 0.3)',
-            color: isTouch3DMode ? '#22D3EE' : '#ffffff',
-          }}
-        >
-          {isTouch3DMode ? (
-            <>
-              <Unlock className="w-3.5 h-3.5 text-[#22D3EE]" />
-              <span>Sentuh 3D: Aktif</span>
-            </>
-          ) : (
-            <>
-              <Lock className="w-3.5 h-3.5 text-white/80" />
-              <span>Mode Scroll Halaman</span>
-            </>
-          )}
-        </button>
+        {/* HUD Control Buttons — top right */}
+        <div className="flex items-center gap-2 pointer-events-auto flex-wrap justify-end">
+          {/* Play / Pause */}
+          <button
+            onClick={togglePause}
+            title={isPaused ? 'Lanjutkan Orbit' : 'Jeda Orbit'}
+            className="h-8 px-3 rounded-full text-xs font-bold font-['Geist'] border transition-all cursor-pointer flex items-center gap-1.5 shadow-lg"
+            style={{
+              backgroundColor: isPaused ? 'rgba(34,211,238,0.2)' : 'rgba(255,255,255,0.08)',
+              borderColor: isPaused ? '#22D3EE' : 'rgba(255,255,255,0.25)',
+              color: isPaused ? '#22D3EE' : '#ffffff',
+            }}
+          >
+            {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{isPaused ? 'Play' : 'Pause'}</span>
+          </button>
+
+          {/* Speed multiplier cycle */}
+          <button
+            onClick={cycleSpeed}
+            title="Ganti kecepatan orbit"
+            className="h-8 px-3 rounded-full text-xs font-bold font-['Geist'] border border-white/25 bg-white/8 text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-lg hover:border-[#22D3EE]/60 hover:text-[#22D3EE]"
+            style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+          >
+            <Gauge className="w-3.5 h-3.5" />
+            <span>{orbitSpeed}×</span>
+          </button>
+
+          {/* Cinematic Mode (Hide orbit lines) */}
+          <button
+            onClick={toggleCinematic}
+            title={isCinematic ? 'Tampilkan Garis Orbit' : 'Mode Sinematik'}
+            className="h-8 px-3 rounded-full text-xs font-bold font-['Geist'] border transition-all cursor-pointer flex items-center gap-1.5 shadow-lg"
+            style={{
+              backgroundColor: isCinematic ? 'rgba(128,222,234,0.2)' : 'rgba(255,255,255,0.08)',
+              borderColor: isCinematic ? '#80deea' : 'rgba(255,255,255,0.25)',
+              color: isCinematic ? '#80deea' : '#ffffff',
+            }}
+          >
+            <Film className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{isCinematic ? 'Orbit On' : 'Sinematik'}</span>
+          </button>
+
+          {/* Mobile touch toggle */}
+          <button
+            onClick={toggleTouch3DMode}
+            className="md:hidden h-8 px-3 rounded-full text-xs font-bold font-['Geist'] border transition-all cursor-pointer shadow-lg flex items-center gap-1.5"
+            style={{
+              backgroundColor: isTouch3DMode ? 'rgba(34, 211, 238, 0.15)' : 'rgba(255, 255, 255, 0.1)',
+              borderColor: isTouch3DMode ? '#22D3EE' : 'rgba(255, 255, 255, 0.3)',
+              color: isTouch3DMode ? '#22D3EE' : '#ffffff',
+            }}
+          >
+            {isTouch3DMode ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+            <span>{isTouch3DMode ? '3D' : 'Scroll'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Info Panel HUD Modal (Optimized CSS without laggy backdrop-blur) */}
