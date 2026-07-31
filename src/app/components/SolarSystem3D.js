@@ -772,14 +772,12 @@ export default function SolarSystem3D() {
     domElem.addEventListener('wheel', handleWheel, { passive: false });
     domElem.style.touchAction = isTouch3DModeRef.current ? 'none' : 'pan-y';
 
-    // Lights — low ambient for dramatic day/night shading effect
-    // Ambient very low so the shadow side of planets is clearly dark
-    const ambient = new THREE.AmbientLight(0x112244, 0.25); // dim blue-tinted ambient (space feel)
+    // Lights — balanced for visibility + subtle day/night shading
+    const ambient = new THREE.AmbientLight(0xffffff, 1.4);
     scene.add(ambient);
 
-    const sunLight = new THREE.PointLight(0xfff5ea, 10.0, 4000);
+    const sunLight = new THREE.PointLight(0xfff5ea, 6.0, 4000);
     scene.add(sunLight);
-    // No fill light — we want one-sided sun illumination for realistic shading
 
     // Starfield (Optimized count)
     const starGeo = new THREE.BufferGeometry();
