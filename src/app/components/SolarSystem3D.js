@@ -509,11 +509,11 @@ export default function SolarSystem3D() {
     // Controls
     const controls = {
       target: new THREE.Vector3(0, 0, 0),
-      radius: 230,
+      radius: 360,
       theta: 0.9,
       phi: 1.05,
       minRadius: 6,
-      maxRadius: 550,
+      maxRadius: 1000,
       update() {
         this.phi = Math.max(0.15, Math.min(Math.PI - 0.15, this.phi));
         const sinPhi = Math.sin(this.phi);
@@ -652,16 +652,16 @@ export default function SolarSystem3D() {
     const glowOuterMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.12, side: THREE.BackSide });
     scene.add(new THREE.Mesh(glowOuterGeo, glowOuterMat));
 
-    // Planets
+    // Planets with expanded, non-overlapping orbital distances
     const PLANET_DEFS = [
-      ['mercury', 1.0, 18, 0xb5b5aa, 1.6],
-      ['venus',   1.6, 25, 0xf0cf8e, 1.2],
-      ['earth',   1.7, 33, 0x64b5f6, 1.0],
-      ['mars',    1.3, 41, 0xe57373, 0.8],
-      ['jupiter', 4.4, 58, 0xffcc80, 0.45],
-      ['saturn',  3.8, 76, 0xe3c88f, 0.32],
-      ['uranus',  2.6, 92, 0x80deea, 0.22],
-      ['neptune', 2.5, 106, 0x64b5f6, 0.17],
+      ['mercury', 1.0, 20,  0xb5b5aa, 1.6],
+      ['venus',   1.6, 28,  0xf0cf8e, 1.2],
+      ['earth',   1.7, 38,  0x64b5f6, 1.0],
+      ['mars',    1.3, 50,  0xe57373, 0.8],
+      ['jupiter', 4.4, 85,  0xffcc80, 0.45],
+      ['saturn',  3.8, 115, 0xe3c88f, 0.32],
+      ['uranus',  2.6, 145, 0x80deea, 0.22],
+      ['neptune', 2.5, 172, 0x64b5f6, 0.17],
     ];
 
     const orbitGroups = [];
@@ -885,7 +885,7 @@ export default function SolarSystem3D() {
     // Pluto
     const plutoOrbit = new THREE.Group();
     scene.add(plutoOrbit);
-    const plutoDist = 122;
+    const plutoDist = 195;
     const plutoRingGeo = new THREE.RingGeometry(plutoDist - 0.08, plutoDist + 0.08, 128);
     const plutoRingMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
     const plutoRingMesh = new THREE.Mesh(plutoRingGeo, plutoRingMat);
@@ -903,19 +903,19 @@ export default function SolarSystem3D() {
     clickableMeshes.push(plutoMesh);
     orbitGroups.push({ group: plutoOrbit, speed: 0.13, mesh: plutoMesh, selfSpin: 0.2 });
 
-    // Asteroid Belt InstancedMesh
+    // Asteroid Belt InstancedMesh (between Mars at 50 and Jupiter at 85)
     const asteroidGroup = new THREE.Group();
     scene.add(asteroidGroup);
-    const asteroidCount = 500;
+    const asteroidCount = 550;
     const asteroidGeo = new THREE.DodecahedronGeometry(0.28, 0);
     const asteroidMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.6, emissive: 0x888888, emissiveIntensity: 0.2 });
     const asteroidInstMesh = new THREE.InstancedMesh(asteroidGeo, asteroidMat, asteroidCount);
     const dummy = new THREE.Object3D();
-    const beltInnerR = 47, beltOuterR = 54;
+    const beltInnerR = 60, beltOuterR = 68;
     for (let i = 0; i < asteroidCount; i++) {
       const r = beltInnerR + Math.random() * (beltOuterR - beltInnerR);
       const theta = Math.random() * Math.PI * 2;
-      const y = (Math.random() - 0.5) * 1.6;
+      const y = (Math.random() - 0.5) * 1.8;
       dummy.position.set(r * Math.cos(theta), y, r * Math.sin(theta));
       dummy.scale.setScalar(0.5 + Math.random());
       dummy.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
@@ -927,7 +927,7 @@ export default function SolarSystem3D() {
     clickableMeshes.push(asteroidInstMesh);
 
     // Dedicated Transparent Click Ring for Asteroid Belt
-    const beltClickTorusGeo = new THREE.TorusGeometry(50.5, 4.0, 16, 64);
+    const beltClickTorusGeo = new THREE.TorusGeometry(64, 4.5, 16, 64);
     const beltClickTorusMat = new THREE.MeshBasicMaterial({ visible: false });
     const beltClickRing = new THREE.Mesh(beltClickTorusGeo, beltClickTorusMat);
     beltClickRing.rotation.x = Math.PI / 2;
@@ -939,7 +939,7 @@ export default function SolarSystem3D() {
     const ceresOrbitGroup = new THREE.Group();
     scene.add(ceresOrbitGroup);
 
-    const ceresDist = 50.5;
+    const ceresDist = 64;
     const ceresRingGeo = new THREE.RingGeometry(ceresDist - 0.06, ceresDist + 0.06, 128);
     const ceresRingMat = new THREE.MeshBasicMaterial({ color: 0x80cbc4, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
     const ceresRingMesh = new THREE.Mesh(ceresRingGeo, ceresRingMat);
@@ -965,16 +965,16 @@ export default function SolarSystem3D() {
     // --- PHASE 2: KUIPER BELT & ERIS ---
     const kuiperGroup = new THREE.Group();
     scene.add(kuiperGroup);
-    const kuiperParticleCount = 400;
+    const kuiperParticleCount = 450;
     const kuiperGeo = new THREE.DodecahedronGeometry(0.3, 0);
     const kuiperMat = new THREE.MeshStandardMaterial({ color: 0x80deea, roughness: 0.4, emissive: 0x00bcd4, emissiveIntensity: 0.15 });
     const kuiperInstMesh = new THREE.InstancedMesh(kuiperGeo, kuiperMat, kuiperParticleCount);
     const kuiperDummy = new THREE.Object3D();
-    const kuiperInnerR = 135, kuiperOuterR = 160;
+    const kuiperInnerR = 210, kuiperOuterR = 240;
     for (let i = 0; i < kuiperParticleCount; i++) {
       const r = kuiperInnerR + Math.random() * (kuiperOuterR - kuiperInnerR);
       const theta = Math.random() * Math.PI * 2;
-      const y = (Math.random() - 0.5) * 3.0;
+      const y = (Math.random() - 0.5) * 4.0;
       kuiperDummy.position.set(r * Math.cos(theta), y, r * Math.sin(theta));
       kuiperDummy.scale.setScalar(0.4 + Math.random() * 0.8);
       kuiperDummy.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
@@ -985,7 +985,7 @@ export default function SolarSystem3D() {
     scene.add(kuiperInstMesh);
     clickableMeshes.push(kuiperInstMesh);
 
-    const kuiperClickTorusGeo = new THREE.TorusGeometry(147.5, 10.0, 16, 64);
+    const kuiperClickTorusGeo = new THREE.TorusGeometry(225, 15.0, 16, 64);
     const kuiperClickRing = new THREE.Mesh(kuiperClickTorusGeo, new THREE.MeshBasicMaterial({ visible: false }));
     kuiperClickRing.rotation.x = Math.PI / 2;
     kuiperClickRing.userData = { id: 'kuiperbelt', clickable: true };
@@ -997,7 +997,7 @@ export default function SolarSystem3D() {
     erisOrbitGroup.rotation.x = Math.PI / 6; // 30° orbital tilt
     scene.add(erisOrbitGroup);
 
-    const erisDist = 152;
+    const erisDist = 225;
     const erisRingGeo = new THREE.RingGeometry(erisDist - 0.08, erisDist + 0.08, 128);
     const erisRingMat = new THREE.MeshBasicMaterial({ color: 0xe0f7fa, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
     const erisRingMesh = new THREE.Mesh(erisRingGeo, erisRingMat);
@@ -1027,8 +1027,8 @@ export default function SolarSystem3D() {
     scene.add(cometOrbitGroup);
 
     const cometCurve = new THREE.EllipseCurve(
-      -30, 0,
-      128, 68,
+      -40, 0,
+      190, 100,
       0, 2 * Math.PI,
       false,
       0
@@ -1238,8 +1238,8 @@ export default function SolarSystem3D() {
 
       // Comet Orbit Motion
       cometT += dt * 0.08;
-      const cx = -30 + Math.cos(cometT) * 128;
-      const cz = Math.sin(cometT) * 68;
+      const cx = -40 + Math.cos(cometT) * 190;
+      const cz = Math.sin(cometT) * 100;
       cometGroup.position.set(cx, 0, cz);
 
       // Tail dynamically points away from the Sun
@@ -1270,17 +1270,17 @@ export default function SolarSystem3D() {
 
         if (currentSelectedId === 'asteroidbelt') {
           controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.05);
-          controls.radius += (110 - controls.radius) * 0.05;
+          controls.radius += (130 - controls.radius) * 0.05;
 
           selectionAuraMesh.position.set(0, 0, 0);
-          const beltScale = 51 + Math.sin(time * 3) * 0.5;
+          const beltScale = 64 + Math.sin(time * 3) * 0.5;
           selectionAuraMesh.scale.set(beltScale, beltScale, beltScale);
         } else if (currentSelectedId === 'kuiperbelt') {
           controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.05);
-          controls.radius += (260 - controls.radius) * 0.05;
+          controls.radius += (380 - controls.radius) * 0.05;
 
           selectionAuraMesh.position.set(0, 0, 0);
-          const kuiperScale = 147 + Math.sin(time * 3) * 1.0;
+          const kuiperScale = 225 + Math.sin(time * 3) * 1.0;
           selectionAuraMesh.scale.set(kuiperScale, kuiperScale, kuiperScale);
         } else if (currentSelectedId === 'comet') {
           controls.target.lerp(cometWorldPos, 0.08);
@@ -1327,8 +1327,8 @@ export default function SolarSystem3D() {
 
         if (isResettingZoomRef.current) {
           controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.05);
-          controls.radius += (230 - controls.radius) * 0.05;
-          if (Math.abs(controls.radius - 230) < 1.5) {
+          controls.radius += (360 - controls.radius) * 0.05;
+          if (Math.abs(controls.radius - 360) < 2.0) {
             isResettingZoomRef.current = false;
           }
         }
