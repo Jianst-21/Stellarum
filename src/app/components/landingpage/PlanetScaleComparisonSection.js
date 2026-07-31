@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { ArrowLeftRight, Info, Sparkles, Scale, ChevronDown, RotateCw, ArrowUpDown, HelpCircle, CheckCircle2, XCircle, RefreshCw, Trophy } from 'lucide-react';
+import { ArrowLeftRight, Info, Sparkles, Scale, ChevronDown, RotateCw, ArrowUpDown, HelpCircle, CheckCircle2, XCircle, RefreshCw, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const CELESTIAL_BODIES = [
   { id: 'sun', name: 'Matahari', diameterKm: 1392700, distKm: 0, tempC: 5500, ratioToEarth: 109.2, color: 'from-amber-400 to-orange-600', shadow: 'shadow-orange-500/50', category: 'Bintang', description: '99.8% dari seluruh massa Tata Surya. Bisa memuat 1.300.000 planet Bumi di dalamnya.' },
@@ -222,6 +222,28 @@ export default function PlanetScaleComparisonSection() {
 
   const sortedBodies = getSortedLineup();
 
+  // Pagination logic for 3D Lineup Showcase (4 items per page)
+  const [lineupPageIndex, setLineupPageIndex] = useState(0);
+  const itemsPerPage = 4;
+  const totalLineupPages = Math.ceil(sortedBodies.length / itemsPerPage);
+
+  const prevLineupPage = () => {
+    setLineupPageIndex((prev) => (prev > 0 ? prev - 1 : totalLineupPages - 1));
+  };
+
+  const nextLineupPage = () => {
+    setLineupPageIndex((prev) => (prev < totalLineupPages - 1 ? prev + 1 : 0));
+  };
+
+  useEffect(() => {
+    setLineupPageIndex(0);
+  }, [sortCriteria]);
+
+  const currentVisibleBodies = sortedBodies.slice(
+    lineupPageIndex * itemsPerPage,
+    (lineupPageIndex + 1) * itemsPerPage
+  );
+
   return (
     <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
       {/* Section Header */}
@@ -402,47 +424,74 @@ export default function PlanetScaleComparisonSection() {
       {/* TAB 2: LINEUP & SORTING 3D */}
       {activeTab === 'lineup' && (
         <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
-          {/* Filter Bar */}
+          {/* Filter Bar & Carousel Controls */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800">
             <div>
               <h3 className="text-xl font-bold text-white">Barisan Benda Kosmik 3D</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Pilih kriteria pengurutan untuk mengubah posisi barisan planet</p>
+              <p className="text-xs text-gray-400 mt-0.5">Menampilkan 4 objek per halaman. Gunakan tombol panah untuk menggeser.</p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 font-medium">Urutkan Berdasarkan:</span>
-              <select
-                value={sortCriteria}
-                onChange={(e) => setSortCriteria(e.target.value)}
-                className="bg-slate-950 border border-purple-500/40 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none"
-              >
-                <option value="diameterDesc">📏 Ukuran Diameter (Terbesar → Terkecil)</option>
-                <option value="distAsc">☀️ Jarak dari Matahari (Terdekat → Terjauh)</option>
-                <option value="tempDesc">🔥 Suhu Rata-Rata (Terpanas → Terdingin)</option>
-              </select>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400 font-medium">Urutkan:</span>
+                <select
+                  value={sortCriteria}
+                  onChange={(e) => setSortCriteria(e.target.value)}
+                  className="bg-slate-950 border border-purple-500/40 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none cursor-pointer"
+                >
+                  <option value="diameterDesc">📏 Ukuran Diameter (Terbesar → Terkecil)</option>
+                  <option value="distAsc">☀️ Jarak dari Matahari (Terdekat → Terjauh)</option>
+                  <option value="tempDesc">🔥 Suhu Rata-Rata (Terpanas → Terdingin)</option>
+                </select>
+              </div>
+
+              {/* Carousel Navigation Buttons */}
+              <div className="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 shadow-md">
+                <button
+                  onClick={prevLineupPage}
+                  className="p-1.5 rounded-lg hover:bg-purple-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
+                  title="Halaman Sebelumnya"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-semibold px-2 text-purple-300">
+                  {lineupPageIndex + 1} / {totalLineupPages}
+                </span>
+                <button
+                  onClick={nextLineupPage}
+                  className="p-1.5 rounded-lg hover:bg-purple-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
+                  title="Halaman Selanjutnya"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Horizontal Scrollable 3D Lineup Showcase */}
-          <div className="flex items-end gap-6 overflow-x-auto pb-6 pt-4 snap-x">
-            {sortedBodies.map((b, idx) => {
-              const px = getLogScalePx(b.diameterKm, 65, 130);
+          {/* 4 Items Showcase Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-h-[320px] items-stretch">
+            {currentVisibleBodies.map((b, idxInPage) => {
+              const globalRank = lineupPageIndex * itemsPerPage + idxInPage + 1;
+              const px = getLogScalePx(b.diameterKm, 70, 135);
               return (
                 <div
                   key={b.id}
-                  className="flex flex-col items-center justify-end flex-shrink-0 snap-center bg-slate-950/70 border border-slate-800/80 hover:border-purple-500/50 rounded-2xl p-5 min-w-[170px] shadow-xl hover:shadow-purple-500/10 transition-all group"
+                  className="flex flex-col items-center justify-between bg-slate-950/80 border border-slate-800 hover:border-purple-500/50 rounded-2xl p-5 shadow-xl hover:shadow-purple-500/10 transition-all group relative"
                 >
-                  <span className="text-[10px] font-black tracking-widest text-purple-400 bg-purple-950/60 px-2.5 py-0.5 rounded-full border border-purple-500/30 mb-3 shadow-md">
-                    #{idx + 1}
+                  <span className="text-[10px] font-black tracking-widest text-purple-400 bg-purple-950/60 px-3 py-0.5 rounded-full border border-purple-500/30 mb-2 shadow-md">
+                    #{globalRank}
                   </span>
-                  <div className="h-48 flex items-center justify-center w-full">
+                  <div className="h-44 flex items-center justify-center w-full my-auto">
                     <PlanetSphere3D id={b.id} sizePx={px} />
                   </div>
-                  <h4 className="text-sm font-bold text-white mt-3 group-hover:text-purple-300 transition-colors">{b.name}</h4>
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    {sortCriteria === 'diameterDesc' && `${b.diameterKm.toLocaleString('id-ID')} km`}
-                    {sortCriteria === 'distAsc' && (b.distKm === 0 ? 'Pusat' : `${b.distKm} jt km`)}
-                    {sortCriteria === 'tempDesc' && `${b.tempC}°C`}
-                  </p>
+                  <div className="text-center mt-3">
+                    <h4 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">{b.name}</h4>
+                    <p className="text-xs text-purple-400 font-semibold mt-1">
+                      {sortCriteria === 'diameterDesc' && `${b.diameterKm.toLocaleString('id-ID')} km`}
+                      {sortCriteria === 'distAsc' && (b.distKm === 0 ? 'Pusat' : `${b.distKm} jt km`)}
+                      {sortCriteria === 'tempDesc' && `${b.tempC}°C`}
+                    </p>
+                  </div>
                 </div>
               );
             })}
