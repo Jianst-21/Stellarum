@@ -17,6 +17,19 @@ const CELESTIAL_BODIES = [
   { id: 'moon', name: 'Bulan', diameterKm: 3474, ratioToEarth: 0.27, color: 'from-gray-200 to-slate-400', shadow: 'shadow-gray-300/40', category: 'Satelit Alami', description: 'Satelit alami tunggal Bumi. Tarikan gravitasinya menciptakan pasang surut air laut.' }
 ];
 
+const PLANET_COLORS = {
+  sun: 0xffaa00,
+  jupiter: 0xdca675,
+  saturn: 0xe3c88f,
+  uranus: 0x80deea,
+  neptune: 0x4f7ded,
+  earth: 0x2b82c5,
+  venus: 0xe6b86a,
+  mars: 0xc05333,
+  mercury: 0x8c8c88,
+  moon: 0x9e9e9e,
+};
+
 // Interactive 3D Sphere Renderer with NASA texture
 function PlanetSphere3D({ id, sizePx }) {
   const containerRef = useRef(null);
@@ -40,38 +53,49 @@ function PlanetSphere3D({ id, sizePx }) {
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, id === 'sun' ? 2.5 : 1.3);
+    // Optimized Lighting — Ambient + Key Light + Soft Fill Light (Never Pitch Black)
+    const ambient = new THREE.AmbientLight(0xffffff, id === 'sun' ? 2.5 : 1.8);
     scene.add(ambient);
 
-    const dirLight = new THREE.DirectionalLight(0xfff5ea, id === 'sun' ? 0 : 3.0);
-    dirLight.position.set(5, 3, 5);
-    scene.add(dirLight);
+    if (id !== 'sun') {
+      const keyLight = new THREE.DirectionalLight(0xfff5ea, 2.2);
+      keyLight.position.set(5, 3, 5);
+      scene.add(keyLight);
 
-    // Geometry & Texture
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      fillLight.position.set(-5, -3, -5);
+      scene.add(fillLight);
+    }
+
+    // Geometry & Base Color Material (Instant render, no black screen while loading)
     const geo = new THREE.SphereGeometry(1, 48, 48);
-    const textureLoader = new THREE.TextureLoader();
-    const texturePath = `/textures/planets/${id}.jpg`;
+    const baseColor = PLANET_COLORS[id] || 0xcccccc;
 
     let material;
-    const texture = textureLoader.load(
-      texturePath,
-      undefined,
-      undefined,
-      () => console.warn(`Fallback texture for ${id}`)
-    );
-
     if (id === 'sun') {
-      material = new THREE.MeshBasicMaterial({ map: texture });
+      material = new THREE.MeshBasicMaterial({ color: baseColor });
     } else {
       material = new THREE.MeshPhongMaterial({
-        map: texture,
-        shininess: 12,
+        color: baseColor,
+        shininess: 15,
       });
     }
 
     const mesh = new THREE.Mesh(geo, material);
     scene.add(mesh);
+
+    // Asynchronous NASA Texture Loader with instant material update
+    const textureLoader = new THREE.TextureLoader();
+    const texturePath = `/textures/planets/${id}.jpg`;
+    textureLoader.load(
+      texturePath,
+      (loadedTex) => {
+        material.map = loadedTex;
+        material.needsUpdate = true;
+      },
+      undefined,
+      (err) => console.warn(`Using base color for ${id}:`, err)
+    );
 
     // Saturn Ring
     let saturnRingMesh = null;
