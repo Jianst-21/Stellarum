@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "question": "Angin terkencang di Tata Surya (mencapai 2.100 km/jam) ditemukan di planet mana?",
+    "options": ["Jupiter", "Neptunus", "Mars", "Venus"],
+    "correctIndex": 1,
+    "explanation": "Neptunus memiliki angin supersonik terkencang di Tata Surya, terdorong oleh aliran panas internal inti planet meskipun jauh dari Matahari."
+  },
+  {
+    "id": 2,
+    "question": "Satelit alami manakah yang diketahui memiliki medan magnetnya sendiri?",
+    "options": ["Bulan (Luna)", "Titan", "Ganymede", "Europa"],
+    "correctIndex": 2,
+    "explanation": "Ganymede (satelit terbesar Jupiter) memiliki inti besi cair yang menghasilkan medan magnetnya sendiri — satu-satunya bulan di Tata Surya yang seperti ini."
+  },
+  {
+    "id": 3,
+    "question": "Planet manakah yang berotasi secara retrograd (berlawanan arah) dibanding mayoritas planet lain?",
+    "options": ["Merkurius", "Venus", "Uranus", "Mars"],
+    "correctIndex": 1,
+    "explanation": "Venus berotasi dari timur ke barat (retrograd), diduga akibat benturan raksasa dengan objek astronomi lain di masa purba tata surya."
+  },
+  {
+    "id": 4,
+    "question": "Di manakah letak planet kerdil Ceres?",
+    "options": ["Sabuk Kuiper", "Sabuk Asteroid", "Awan Oort", "Orbit Neptunus"],
+    "correctIndex": 1,
+    "explanation": "Ceres adalah objek terbesar di Sabuk Asteroid antara Mars dan Jupiter, diklasifikasikan sebagai planet kerdil sejak 2006."
+  },
+  {
+    "id": 5,
+    "question": "Berapa lama cahaya Matahari membutuhkan waktu untuk sampai ke Bumi?",
+    "options": ["1 menit", "8 menit", "30 menit", "1 jam"],
+    "correctIndex": 1,
+    "explanation": "Cahaya bergerak dengan kecepatan sekitar 300.000 km/detik, dan jarak Bumi-Matahari sekitar 150 juta km. Jadinya butuh sekitar 8 menit 20 detik."
+  },
+  {
+    "id": 6,
+    "question": "Planet manakah yang memiliki lebih dari 90 bulan yang diketahui saat ini?",
+    "options": ["Saturnus", "Neptunus", "Jupiter", "Uranus"],
+    "correctIndex": 2,
+    "explanation": "Jupiter kini diketahui memiliki 95 bulan yang terkonfirmasi (per 2023), menjadikannya planet dengan bulan terbanyak di Tata Surya."
+  },
+  {
+    "id": 7,
+    "question": "Apa nama bintang terdekat dengan Tata Surya kita?",
+    "options": ["Sirius", "Proxima Centauri", "Betelgeuse", "Vega"],
+    "correctIndex": 1,
+    "explanation": "Proxima Centauri berjarak sekitar 4,24 tahun cahaya dari Tata Surya, menjadikannya bintang terdekat selain Matahari."
+  },
+  {
+    "id": 8,
+    "question": "Teleskop luar angkasa manakah yang pertama kali mengkonfirmasi lubang hitam supermasif di pusat galaksi?",
+    "options": ["Teleskop Hubble", "Event Horizon Telescope", "James Webb Space Telescope", "Teleskop Chandra"],
+    "correctIndex": 1,
+    "explanation": "Event Horizon Telescope (EHT) merilis foto pertama lubang hitam (M87*) pada April 2019, dan foto Sagittarius A* di pusat Bima Sakti pada Mei 2022."
+  },
+  {
+    "id": 9,
+    "question": "Planet manakah yang suhunya paling panas meski bukan yang terdekat dengan Matahari?",
+    "options": ["Merkurius", "Venus", "Mars", "Jupiter"],
+    "correctIndex": 1,
+    "explanation": "Venus lebih panas dari Merkurius meskipun lebih jauh dari Matahari, karena atmosfer tebal CO2 menciptakan efek rumah kaca ekstrem dengan suhu rata-rata 465°C."
+  },
+  {
+    "id": 10,
+    "question": "Wahana antariksa manakah yang paling jauh dari Bumi saat ini?",
+    "options": ["Voyager 2", "Pioneer 10", "Voyager 1", "New Horizons"],
+    "correctIndex": 2,
+    "explanation": "Voyager 1 diluncurkan pada 1977 dan kini telah melampaui heliopause, menjadikannya objek buatan manusia yang paling jauh dari Bumi di ruang antariksa."
+  },
+  {
+    "id": 11,
+    "question": "Berapa lama satu tahun di Neptunus jika diukur dalam tahun Bumi?",
+    "options": ["84 tahun", "120 tahun", "165 tahun", "248 tahun"],
+    "correctIndex": 2,
+    "explanation": "Satu tahun di Neptunus berlangsung sekitar 165 tahun Bumi. Neptunus baru menyelesaikan orbit pertamanya sejak ditemukan (1846) pada tahun 2011."
+  },
+  {
+    "id": 12,
+    "question": "Apa yang membuat cincin Saturnus tampak berwarna berbeda-beda?",
+    "options": ["Gas berbeda", "Partikel es & debu berbeda ukuran", "Cahaya dari bulan Saturnus", "Medan magnet Saturnus"],
+    "correctIndex": 1,
+    "explanation": "Cincin Saturnus terdiri dari miliaran partikel es dan debu berbeda ukuran (dari mikrometer hingga meter), yang memantulkan cahaya Matahari dengan cara berbeda."
+  },
+  {
+    "id": 13,
+    "question": "Bulan manakah yang memiliki danau metana dan etana cair di permukaannya?",
+    "options": ["Europa", "Ganymede", "Titan", "Enceladus"],
+    "correctIndex": 2,
+    "explanation": "Titan, bulan terbesar Saturnus, memiliki atmosfer tebal dan danau serta sungai dari metana dan etana cair — bukan air — menjadikannya objek paling unik di Tata Surya."
+  },
+  {
+    "id": 14,
+    "question": "Berapa kecepatan lepas minimum untuk meninggalkan gravitasi Bumi?",
+    "options": ["7,9 km/detik", "11,2 km/detik", "29,8 km/detik", "42 km/detik"],
+    "correctIndex": 1,
+    "explanation": "Kecepatan lepas dari permukaan Bumi adalah sekitar 11,2 km/detik (~40.320 km/jam). Di bawah kecepatan ini, objek akan ditarik kembali oleh gravitasi Bumi."
+  },
+  {
+    "id": 15,
+    "question": "Objek manakah di Tata Surya yang memiliki gunung berapi aktif selain Bumi?",
+    "options": ["Mars", "Venus", "Io (bulan Jupiter)", "Bulan"],
+    "correctIndex": 2,
+    "explanation": "Io adalah bulan Jupiter yang paling aktif secara vulkanik di Tata Surya, dengan ratusan gunung berapi aktif yang disebabkan oleh gaya pasang-surut gravitasi Jupiter yang ekstrem."
+  }
+]
