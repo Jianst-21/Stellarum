@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Lock, Unlock } from 'lucide-react';
 
 const OBJECT_DATA = {
   sun: {
@@ -1552,10 +1552,10 @@ export default function SolarSystem3D() {
           </p>
         </div>
 
-        {/* Mobile Toggle Button for Page Scroll vs 3D Orbit */}
+        {/* Mobile & Tablet Toggle Button for Page Scroll vs 3D Orbit (Hidden on Desktop) */}
         <button
           onClick={toggleTouch3DMode}
-          className="pointer-events-auto self-start sm:self-auto px-3.5 py-1.5 rounded-full text-xs font-bold font-['Geist'] border transition-all cursor-pointer shadow-lg backdrop-blur-sm flex items-center gap-1.5"
+          className="md:hidden pointer-events-auto self-start sm:self-auto px-3.5 py-1.5 rounded-full text-xs font-bold font-['Geist'] border transition-all cursor-pointer shadow-lg backdrop-blur-sm flex items-center gap-2"
           style={{
             backgroundColor: isTouch3DMode ? 'rgba(34, 211, 238, 0.15)' : 'rgba(255, 255, 255, 0.1)',
             borderColor: isTouch3DMode ? '#22D3EE' : 'rgba(255, 255, 255, 0.3)',
@@ -1564,13 +1564,13 @@ export default function SolarSystem3D() {
         >
           {isTouch3DMode ? (
             <>
-              <span className="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse" />
-              <span>🔓 Sentuh 3D: Aktif</span>
+              <Unlock className="w-3.5 h-3.5 text-[#22D3EE]" />
+              <span>Sentuh 3D: Aktif</span>
             </>
           ) : (
             <>
-              <span className="w-2 h-2 rounded-full bg-white/60" />
-              <span>🔒 Mode Scroll Halaman</span>
+              <Lock className="w-3.5 h-3.5 text-white/80" />
+              <span>Mode Scroll Halaman</span>
             </>
           )}
         </button>
