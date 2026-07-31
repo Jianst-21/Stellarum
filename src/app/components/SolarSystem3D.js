@@ -130,6 +130,18 @@ const OBJECT_DATA = {
     desc: "Cincin raksasa berisi triliunan objek es, planet kerdil, dan komet di luar orbit Neptunus.",
     distance: "4,5–7,5 miliar km", size: "Lebar ±3 miliar km",
     more: "Sabuk Kuiper jauh lebih luas dan 20 kali lebih masif daripada Sabuk Asteroid. Wilayah ini menjadi rumah bagi planet-planet kerdil es seperti Pluto, Eris, Haumea, dan Makemake, serta asal dari komet periode pendek."
+  },
+  voyager1: {
+    name: "Voyager 1", type: "WAHANA ANTARIKSA (INTERSTELLAR)",
+    desc: "Objek buatan manusia terjauh dari Bumi yang sedang melesat menembus ruang antarbintang di luar heliosfer.",
+    distance: "24,3 miliar km", size: "3,7 meter (Antena)",
+    more: "Diluncurkan NASA pada 1977, Voyager 1 membawa 'Golden Record'—piringan emas berisi suara, musik, dan gambar dari peradaban Bumi untuk kehidupan luar angkasa. Saat ini ia melaju dengan kecepatan 61.000 km/jam di ruang antarbintang."
+  },
+  jwst: {
+    name: "Teleskop James Webb (JWST)", type: "TELESKOP ANTARIKSA (BUMI L2)",
+    desc: "Teleskop antariksa terbesar dan tercanggih milik manusia yang mengorbit titik Lagrange L2 di belakang Bumi.",
+    distance: "1,5 juta km (dari Bumi L2)", size: "20,2 m x 14,2 m (Sunshield)",
+    more: "JWST mengamati alam semesta dalam spektrum inframerah menggunakan cermin utama berlapis emas 18 segmen segienam berdiameter 6,5 meter. Teleskop ini mampu melihat galaksi pertama yang terbentuk setelah Big Bang dan menganalisis atmosfer exoplanet."
   }
 };
 
@@ -155,7 +167,102 @@ const AURA_COLORS = {
   ceres: 0x80cbc4,
   eris: 0xe0f7fa,
   kuiperbelt: 0x00bcd4,
+  voyager1: 0xffd700,
+  jwst: 0xffb300,
 };
+
+// Helper functions for 3D Spacecraft Probe models (Phase 3)
+function createJWSTMesh() {
+  const jwstGroup = new THREE.Group();
+
+  // Multilayer Sunshield
+  const shieldGeo = new THREE.PlaneGeometry(1.2, 0.7);
+  const shieldMat = new THREE.MeshStandardMaterial({
+    color: 0xeeeeee,
+    metalness: 0.9,
+    roughness: 0.2,
+    side: THREE.DoubleSide
+  });
+  const shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+  shieldMesh.rotation.x = Math.PI / 2;
+  jwstGroup.add(shieldMesh);
+
+  // Hexagonal Golden Primary Mirror Array
+  const mirrorGroup = new THREE.Group();
+  const hexMat = new THREE.MeshStandardMaterial({
+    color: 0xffd700,
+    metalness: 0.95,
+    roughness: 0.1
+  });
+
+  const hexGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.03, 6);
+  const centerHex = new THREE.Mesh(hexGeo, hexMat);
+  centerHex.rotation.x = Math.PI / 2;
+  mirrorGroup.add(centerHex);
+
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * Math.PI) / 3;
+    const hMesh = new THREE.Mesh(hexGeo, hexMat);
+    hMesh.rotation.x = Math.PI / 2;
+    hMesh.position.set(Math.cos(angle) * 0.22, Math.sin(angle) * 0.22, 0);
+    mirrorGroup.add(hMesh);
+  }
+  mirrorGroup.position.set(0, 0.25, 0);
+  jwstGroup.add(mirrorGroup);
+
+  // Click target sphere
+  const clickSphereGeo = new THREE.SphereGeometry(1.0, 12, 12);
+  const clickSphereMat = new THREE.MeshBasicMaterial({ visible: false });
+  const clickSphere = new THREE.Mesh(clickSphereGeo, clickSphereMat);
+  clickSphere.userData = { id: 'jwst', clickable: true };
+  jwstGroup.add(clickSphere);
+
+  jwstGroup.userData = { id: 'jwst', clickable: true, radiusSize: 0.6 };
+  return jwstGroup;
+}
+
+function createVoyagerMesh() {
+  const vGroup = new THREE.Group();
+
+  // White High-Gain Parabolic Dish Antenna
+  const dishGeo = new THREE.ConeGeometry(0.7, 0.25, 24, 1, true);
+  const dishMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, side: THREE.DoubleSide });
+  const dishMesh = new THREE.Mesh(dishGeo, dishMat);
+  dishMesh.rotation.x = -Math.PI / 2;
+  vGroup.add(dishMesh);
+
+  // Golden Record
+  const recordGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.02, 16);
+  const recordMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.1 });
+  const recordMesh = new THREE.Mesh(recordGeo, recordMat);
+  recordMesh.position.set(0.3, -0.1, 0);
+  vGroup.add(recordMesh);
+
+  // Main Bus Chassis
+  const busGeo = new THREE.BoxGeometry(0.35, 0.25, 0.35);
+  const busMat = new THREE.MeshStandardMaterial({ color: 0x90a4ae, metalness: 0.8, roughness: 0.3 });
+  const busMesh = new THREE.Mesh(busGeo, busMat);
+  busMesh.position.set(0, -0.2, 0);
+  vGroup.add(busMesh);
+
+  // Magnetometer Boom
+  const boomGeo = new THREE.CylinderGeometry(0.02, 0.02, 1.4, 8);
+  const boomMat = new THREE.MeshStandardMaterial({ color: 0x455a64 });
+  const boomMesh = new THREE.Mesh(boomGeo, boomMat);
+  boomMesh.position.set(-0.6, -0.2, 0);
+  boomMesh.rotation.z = Math.PI / 2;
+  vGroup.add(boomMesh);
+
+  // Click target sphere
+  const clickSphereGeo = new THREE.SphereGeometry(1.4, 12, 12);
+  const clickSphereMat = new THREE.MeshBasicMaterial({ visible: false });
+  const clickSphere = new THREE.Mesh(clickSphereGeo, clickSphereMat);
+  clickSphere.userData = { id: 'voyager1', clickable: true };
+  vGroup.add(clickSphere);
+
+  vGroup.userData = { id: 'voyager1', clickable: true, radiusSize: 0.7 };
+  return vGroup;
+}
 
 // Helper function to create seamless 360-degree Sun texture
 function createSeamlessSunTexture() {
@@ -721,7 +828,24 @@ export default function SolarSystem3D() {
         moonMesh.add(moonClickMesh);
         clickableMeshes.push(moonClickMesh);
 
+        // --- PHASE 3: JWST Space Telescope (Earth L2 Point) ---
+        const jwstOrbitGroup = new THREE.Group();
+        planetMesh.add(jwstOrbitGroup);
+
+        const jwstDist = 5.2;
+        const jwstRingGeo = new THREE.RingGeometry(jwstDist - 0.04, jwstDist + 0.04, 64);
+        const jwstRingMat = new THREE.MeshBasicMaterial({ color: 0xffb300, side: THREE.DoubleSide, transparent: true, opacity: 0.25 });
+        const jwstRingMesh = new THREE.Mesh(jwstRingGeo, jwstRingMat);
+        jwstRingMesh.rotation.x = Math.PI / 2;
+        jwstOrbitGroup.add(jwstRingMesh);
+
+        const jwstMesh = createJWSTMesh();
+        jwstMesh.position.set(jwstDist, 0, 0);
+        jwstOrbitGroup.add(jwstMesh);
+        clickableMeshes.push(jwstMesh);
+
         orbitGroup.userData.moonGroup = moonOrbitGroup;
+        orbitGroup.userData.jwstGroup = jwstOrbitGroup;
       }
 
       if (id === 'mars') {
@@ -1020,6 +1144,23 @@ export default function SolarSystem3D() {
     erisMesh.add(erisClickMesh);
     clickableMeshes.push(erisClickMesh);
 
+    // --- PHASE 3: VOYAGER 1 (Interstellar Spacecraft Probe) ---
+    const voyagerOrbitGroup = new THREE.Group();
+    voyagerOrbitGroup.rotation.x = Math.PI / 8; // 22.5° orbital tilt
+    scene.add(voyagerOrbitGroup);
+
+    const voyagerDist = 270;
+    const voyagerRingGeo = new THREE.RingGeometry(voyagerDist - 0.1, voyagerDist + 0.1, 128);
+    const voyagerRingMat = new THREE.MeshBasicMaterial({ color: 0xffd700, side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
+    const voyagerRingMesh = new THREE.Mesh(voyagerRingGeo, voyagerRingMat);
+    voyagerRingMesh.rotation.x = Math.PI / 2;
+    voyagerOrbitGroup.add(voyagerRingMesh);
+
+    const voyagerMesh = createVoyagerMesh();
+    voyagerMesh.position.set(voyagerDist, 0, 0);
+    voyagerOrbitGroup.add(voyagerMesh);
+    clickableMeshes.push(voyagerMesh);
+
     // Inclined Comet Orbit
     const cometOrbitGroup = new THREE.Group();
     cometOrbitGroup.rotation.x = Math.PI / 7;
@@ -1208,9 +1349,12 @@ export default function SolarSystem3D() {
         o.group.rotation.y += dt * o.speed * 0.3;
         o.mesh.rotation.y += dt * o.selfSpin;
 
-        // Rotate Moons around parent planets
+        // Rotate Moons and Spacecraft around parent planets
         if (o.group.userData.moonGroup) {
           o.group.userData.moonGroup.rotation.y += dt * 1.5;
+        }
+        if (o.group.userData.jwstGroup) {
+          o.group.userData.jwstGroup.rotation.y += dt * 0.9;
         }
         if (o.group.userData.phobosGroup) {
           o.group.userData.phobosGroup.rotation.y += dt * 2.8;
@@ -1229,10 +1373,12 @@ export default function SolarSystem3D() {
         }
       });
 
-      // Rotate Phase 2 objects
+      // Rotate Phase 2 & 3 objects
       ceresOrbitGroup.rotation.y += dt * 0.28;
       erisOrbitGroup.rotation.y += dt * 0.1;
       kuiperInstMesh.rotation.y += dt * 0.02;
+      voyagerOrbitGroup.rotation.y += dt * 0.04;
+      voyagerMesh.rotation.y += dt * 0.2;
 
       asteroidInstMesh.rotation.y += dt * 0.05;
 
@@ -1304,8 +1450,8 @@ export default function SolarSystem3D() {
             if (currentSelectedId === 'uranus') { offset = 8; baseRadius = 2.6; }
             if (currentSelectedId === 'neptune') { offset = 8; baseRadius = 2.5; }
 
-            // Phase 1 & 2 objects camera close-up offsets & aura sizes
-            if (['moon', 'ganymede', 'europa', 'titan', 'ceres', 'eris'].includes(currentSelectedId)) {
+            // Phase 1, 2, 3 objects camera close-up offsets & aura sizes
+            if (['moon', 'ganymede', 'europa', 'titan', 'ceres', 'eris', 'voyager1', 'jwst'].includes(currentSelectedId)) {
               offset = 4.2;
               baseRadius = targetMesh.userData.radiusSize || 0.6;
             }
@@ -1384,7 +1530,7 @@ export default function SolarSystem3D() {
           Tata Surya Interaktif 3D
         </h2>
         <p className="text-[#22D3EE] font-['Hanken_Grotesk'] text-xs mt-1 font-medium">
-          Klik planet, bulan, asteroid, atau komet untuk melihat detail · Drag untuk memutar · Scroll/Pinch untuk zoom
+          Klik planet, bulan, asteroid, komet, atau wahana antariksa untuk melihat detail · Drag untuk memutar · Scroll/Pinch untuk zoom
         </p>
       </div>
 
