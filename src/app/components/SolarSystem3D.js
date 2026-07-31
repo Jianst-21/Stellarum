@@ -487,17 +487,68 @@ function createProceduralPlanetTexture(id) {
       ctx.fill();
     }
   } else if (id === 'europa') {
-    ctx.fillStyle = '#e0f7fa';
+    // Base: icy white-blue surface
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    grad.addColorStop(0,   '#e8f6ff');
+    grad.addColorStop(0.4, '#d0ecfa');
+    grad.addColorStop(0.7, '#c2e2f5');
+    grad.addColorStop(1,   '#b0d5ee');
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, width, height);
-    for (let i = 0; i < 35; i++) {
-      const x1 = Math.random() * width;
-      const y1 = Math.random() * height;
+
+    // Subtle icy patch regions (chaos terrain)
+    for (let i = 0; i < 20; i++) {
       ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x1 + (Math.random() - 0.5) * 120, y1 + (Math.random() - 0.5) * 80);
-      ctx.strokeStyle = 'rgba(161, 92, 67, 0.6)';
-      ctx.lineWidth = 1 + Math.random() * 2.5;
+      ctx.ellipse(
+        Math.random() * width, Math.random() * height,
+        25 + Math.random() * 55, 12 + Math.random() * 30,
+        Math.random() * Math.PI, 0, Math.PI * 2
+      );
+      ctx.fillStyle = 'rgba(170, 215, 238, 0.35)';
+      ctx.fill();
+    }
+
+    // Europa's famous brown/reddish linea (crack network)
+    for (let i = 0; i < 80; i++) {
+      let cx = Math.random() * width;
+      let cy = Math.random() * height;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      const segs = 3 + Math.floor(Math.random() * 5);
+      let angle = Math.random() * Math.PI * 2;
+      for (let s = 0; s < segs; s++) {
+        angle += (Math.random() - 0.5) * 1.2;
+        const len = 15 + Math.random() * 45;
+        cx += Math.cos(angle) * len;
+        cy += Math.sin(angle) * len;
+        ctx.lineTo(cx, cy);
+      }
+      const r = 110 + Math.floor(Math.random() * 50);
+      const g = 55 + Math.floor(Math.random() * 35);
+      const b = 25 + Math.floor(Math.random() * 25);
+      ctx.lineWidth = 0.5 + Math.random() * 2.2;
+      ctx.strokeStyle = `rgba(${r},${g},${b},${0.45 + Math.random() * 0.45})`;
       ctx.stroke();
+    }
+
+    // Sulfur contamination near cracks (yellowish tint patches)
+    for (let i = 0; i < 18; i++) {
+      ctx.beginPath();
+      ctx.ellipse(
+        Math.random() * width, Math.random() * height,
+        8 + Math.random() * 22, 5 + Math.random() * 14,
+        Math.random() * Math.PI, 0, Math.PI * 2
+      );
+      ctx.fillStyle = 'rgba(200, 150, 80, 0.18)';
+      ctx.fill();
+    }
+
+    // Bright icy spots (fresh ice / chaos terrain peaks)
+    for (let i = 0; i < 35; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, 2 + Math.random() * 6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(245, 252, 255, 0.8)';
+      ctx.fill();
     }
   } else if (id === 'titan') {
     const grad = ctx.createLinearGradient(0, 0, 0, height);
@@ -808,10 +859,11 @@ export default function SolarSystem3D() {
     selectionAuraMesh.visible = false;
     scene.add(selectionAuraMesh);
 
-    // Sun — use real NASA texture photo
+    // Sun — procedural glowing texture (more visually striking than photo)
     const tLoader = new THREE.TextureLoader();
+    const sunTex = createSeamlessSunTexture();
     const sunGeo = new THREE.SphereGeometry(10, 48, 48);
-    const sunMat = new THREE.MeshBasicMaterial({ map: tLoader.load('/textures/planets/sun.jpg') });
+    const sunMat = new THREE.MeshBasicMaterial({ map: sunTex });
     const sunMesh = new THREE.Mesh(sunGeo, sunMat);
     sunMesh.userData = { id: 'sun', clickable: true, radiusSize: 10 };
     scene.add(sunMesh);
@@ -1293,13 +1345,14 @@ export default function SolarSystem3D() {
     const cometGroup = new THREE.Group();
     cometOrbitGroup.add(cometGroup);
 
-    // Core Nucleus
-    const nucleusGeo = new THREE.IcosahedronGeometry(0.35, 2);
+    // Core Nucleus — dark rocky dirty-ice (real comets are very dark)
+    const nucleusGeo = new THREE.IcosahedronGeometry(0.42, 2);
     const nucleusMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      emissive: 0xffffff,
-      emissiveIntensity: 1.0,
-      roughness: 0.2,
+      color: 0x4a3f35,
+      emissive: 0x8a7a6a,
+      emissiveIntensity: 0.4,
+      roughness: 0.9,
+      metalness: 0.0,
     });
     const cometMesh = new THREE.Mesh(nucleusGeo, nucleusMat);
     cometMesh.userData = { id: 'comet', clickable: true, radiusSize: 0.6 };
@@ -1314,12 +1367,12 @@ export default function SolarSystem3D() {
     cometGroup.add(cometClickSphere);
     clickableMeshes.push(cometClickSphere);
 
-    // Glowing Coma Halo
-    const emeraldComaGeo = new THREE.SphereGeometry(0.6, 24, 24);
+    // Glowing Coma Halo — inner bright cyan-green (CN + C2 molecules)
+    const emeraldComaGeo = new THREE.SphereGeometry(0.85, 24, 24);
     const emeraldComaMat = new THREE.MeshBasicMaterial({
-      color: 0x33ff88,
+      color: 0x55ffaa,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.65,
       blending: THREE.AdditiveBlending,
     });
     const emeraldComaMesh = new THREE.Mesh(emeraldComaGeo, emeraldComaMat);
@@ -1327,11 +1380,12 @@ export default function SolarSystem3D() {
     cometMesh.add(emeraldComaMesh);
     clickableMeshes.push(emeraldComaMesh);
 
-    const cyanOuterComaGeo = new THREE.SphereGeometry(1.0, 24, 24);
+    // Mid coma — cyan diffuse halo
+    const cyanOuterComaGeo = new THREE.SphereGeometry(1.6, 24, 24);
     const cyanOuterComaMat = new THREE.MeshBasicMaterial({
       color: 0x22d3ee,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.25,
       blending: THREE.AdditiveBlending,
     });
     const cyanOuterComaMesh = new THREE.Mesh(cyanOuterComaGeo, cyanOuterComaMat);
@@ -1339,48 +1393,78 @@ export default function SolarSystem3D() {
     cometMesh.add(cyanOuterComaMesh);
     clickableMeshes.push(cyanOuterComaMesh);
 
-    // Streamlined Tail
-    const softCircleTex = createSoftCircleTexture();
-    const tailParticleCount = 180;
+    // Outer diffuse envelope
+    const outerEnvGeo = new THREE.SphereGeometry(2.8, 16, 16);
+    const outerEnvMat = new THREE.MeshBasicMaterial({
+      color: 0x88eeff,
+      transparent: true,
+      opacity: 0.10,
+      blending: THREE.AdditiveBlending,
+    });
+    cometMesh.add(new THREE.Mesh(outerEnvGeo, outerEnvMat));
+
+    // Ion tail (blue-white, long, straight)
+    const tailParticleCount = 350;
     const tailGeo = new THREE.BufferGeometry();
     const tailPos = new Float32Array(tailParticleCount * 3);
     const tailColors = new Float32Array(tailParticleCount * 3);
 
     for (let i = 0; i < tailParticleCount; i++) {
       const t = i / tailParticleCount;
-      const spreadWidth = t * 0.7 + 0.05;
-
-      tailPos[i * 3] = -t * 10 - Math.random() * 0.2;
+      const spreadWidth = t * 1.2 + 0.05;
+      tailPos[i * 3]     = -t * 18 - Math.random() * 0.3;
       tailPos[i * 3 + 1] = (Math.random() - 0.5) * spreadWidth;
       tailPos[i * 3 + 2] = (Math.random() - 0.5) * spreadWidth;
-
-      if (t < 0.2) {
-        tailColors[i * 3] = 0.2;
-        tailColors[i * 3 + 1] = 0.95;
-        tailColors[i * 3 + 2] = 0.6;
+      // Gradient: bright cyan-green near head → blue-white → transparent
+      if (t < 0.15) {
+        tailColors[i * 3] = 0.2; tailColors[i * 3+1] = 1.0; tailColors[i * 3+2] = 0.7;
+      } else if (t < 0.5) {
+        const f = (t - 0.15) / 0.35;
+        tailColors[i * 3] = 0.2 + f * 0.6; tailColors[i * 3+1] = 0.9; tailColors[i * 3+2] = 1.0;
       } else {
-        const fade = (t - 0.2) / 0.8;
-        tailColors[i * 3] = 0.5 + fade * 0.5;
-        tailColors[i * 3 + 1] = 0.85 + fade * 0.15;
-        tailColors[i * 3 + 2] = 1.0;
+        const f = (t - 0.5) / 0.5;
+        tailColors[i * 3] = 0.8 + f * 0.2; tailColors[i * 3+1] = 0.9 + f * 0.1; tailColors[i * 3+2] = 1.0;
       }
     }
-
     tailGeo.setAttribute('position', new THREE.BufferAttribute(tailPos, 3));
     tailGeo.setAttribute('color', new THREE.BufferAttribute(tailColors, 3));
-
     const tailMat = new THREE.PointsMaterial({
-      size: 0.35,
+      size: 0.38,
       map: softCircleTex,
       vertexColors: true,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.80,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true,
     });
     const tailPoints = new THREE.Points(tailGeo, tailMat);
     cometMesh.add(tailPoints);
+
+    // Dust tail (yellowish-white, slightly spread, shorter)
+    const dustCount = 120;
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(dustCount * 3);
+    const dustColors = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount; i++) {
+      const t = i / dustCount;
+      const spreadW = t * 2.5 + 0.1;
+      dustPos[i*3]     = -t * 10 - Math.random() * 0.5;
+      dustPos[i*3 + 1] = (Math.random() - 0.5) * spreadW * 0.6;
+      dustPos[i*3 + 2] = (Math.random() - 0.5) * spreadW;
+      const fade = 1 - t;
+      dustColors[i*3]   = 1.0;
+      dustColors[i*3+1] = 0.92 - t * 0.2;
+      dustColors[i*3+2] = 0.7 - t * 0.3;
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    dustGeo.setAttribute('color', new THREE.BufferAttribute(dustColors, 3));
+    const dustMat = new THREE.PointsMaterial({
+      size: 0.28, map: softCircleTex, vertexColors: true,
+      transparent: true, opacity: 0.50,
+      blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
+    });
+    cometMesh.add(new THREE.Points(dustGeo, dustMat));
 
     let cometT = 0;
 
