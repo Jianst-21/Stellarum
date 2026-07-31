@@ -381,10 +381,51 @@ export default function SolarSystem3D() {
     const dragEnd = () => { isDragging = false; };
 
     const domElem = renderer.domElement;
+
+    // Mouse events
     domElem.addEventListener('mousedown', (e) => dragStart(e.clientX, e.clientY));
     domElem.addEventListener('mousemove', (e) => dragMove(e.clientX, e.clientY));
     window.addEventListener('mouseup', dragEnd);
 
+    // Touch events for mobile
+    let lastTouchDist = null;
+    domElem.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        dragStart(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        lastTouchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+      }
+    }, { passive: true });
+
+    domElem.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (e.touches.length === 1) {
+        dragMove(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2) {
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        if (lastTouchDist !== null) {
+          const delta = lastTouchDist - dist;
+          isResettingZoomRef.current = false;
+          controls.radius += delta * 0.3;
+          controls.radius = Math.max(controls.minRadius, Math.min(controls.maxRadius, controls.radius));
+        }
+        lastTouchDist = dist;
+      }
+    }, { passive: false });
+
+    domElem.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) lastTouchDist = null;
+      if (e.touches.length === 0) dragEnd();
+    }, { passive: true });
+
+    // Wheel zoom (desktop)
     const handleWheel = (e) => {
       e.preventDefault();
       isResettingZoomRef.current = false;
@@ -392,6 +433,7 @@ export default function SolarSystem3D() {
       controls.radius = Math.max(controls.minRadius, Math.min(controls.maxRadius, controls.radius));
     };
     domElem.addEventListener('wheel', handleWheel, { passive: false });
+    domElem.style.touchAction = 'none';
 
     // Lights
     const ambient = new THREE.AmbientLight(0xffffff, 2.5);
@@ -678,28 +720,53 @@ export default function SolarSystem3D() {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
+    // Helper: perform raycast at canvas coordinate
+    const performRaycast = (clientX, clientY) => {
+      const rect = domElem.getBoundingClientRect();
+      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(clickableMeshes, true);
+      if (intersects.length > 0) {
+        const id = intersects[0].object.userData.id;
+        if (id) handleSelectObject(id);
+      } else {
+        handleClosePanel();
+      }
+    };
+
+    // Mouse click detection
     let downPos = null;
     const handleMouseDown = (e) => { downPos = { x: e.clientX, y: e.clientY }; };
     const handleMouseUp = (e) => {
       if (downPos && Math.abs(e.clientX - downPos.x) < 4 && Math.abs(e.clientY - downPos.y) < 4) {
-        const rect = domElem.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(clickableMeshes, true);
-        if (intersects.length > 0) {
-          const id = intersects[0].object.userData.id;
-          if (id) {
-            handleSelectObject(id);
-          }
-        } else {
-          handleClosePanel();
+        performRaycast(e.clientX, e.clientY);
+      }
+    };
+
+    // Touch tap detection (for selecting objects on mobile)
+    let touchDownPos = null;
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        touchDownPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+    const handleTouchEnd = (e) => {
+      if (touchDownPos && e.changedTouches.length === 1) {
+        const t = e.changedTouches[0];
+        const dx = Math.abs(t.clientX - touchDownPos.x);
+        const dy = Math.abs(t.clientY - touchDownPos.y);
+        if (dx < 8 && dy < 8) {
+          performRaycast(t.clientX, t.clientY);
         }
+        touchDownPos = null;
       }
     };
 
     domElem.addEventListener('mousedown', handleMouseDown);
     domElem.addEventListener('mouseup', handleMouseUp);
+    domElem.addEventListener('touchstart', handleTouchStart, { passive: true });
+    domElem.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     // Continuous Animation Loop
     const clock = new THREE.Clock();
