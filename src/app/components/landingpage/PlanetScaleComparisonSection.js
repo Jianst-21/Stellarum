@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowLeftRight, Info, Sparkles, Scale, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import { ArrowLeftRight, Info, Sparkles, Scale, ChevronDown, RotateCw } from 'lucide-react';
 
 const CELESTIAL_BODIES = [
   { id: 'sun', name: 'Matahari', diameterKm: 1392700, ratioToEarth: 109.2, color: 'from-amber-400 to-orange-600', shadow: 'shadow-orange-500/50', category: 'Bintang', description: '99.8% dari seluruh massa Tata Surya. Bisa memuat 1.300.000 planet Bumi di dalamnya.' },
@@ -16,6 +17,106 @@ const CELESTIAL_BODIES = [
   { id: 'moon', name: 'Bulan', diameterKm: 3474, ratioToEarth: 0.27, color: 'from-gray-200 to-slate-400', shadow: 'shadow-gray-300/40', category: 'Satelit Alami', description: 'Satelit alami tunggal Bumi. Tarikan gravitasinya menciptakan pasang surut air laut.' }
 ];
 
+// Interactive 3D Sphere Renderer with NASA texture
+function PlanetSphere3D({ id, sizePx }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const width = sizePx;
+    const height = sizePx;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+    camera.position.z = 2.8;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Clear previous elements
+    container.innerHTML = '';
+    container.appendChild(renderer.domElement);
+
+    // Lights
+    const ambient = new THREE.AmbientLight(0xffffff, id === 'sun' ? 2.5 : 1.3);
+    scene.add(ambient);
+
+    const dirLight = new THREE.DirectionalLight(0xfff5ea, id === 'sun' ? 0 : 3.0);
+    dirLight.position.set(5, 3, 5);
+    scene.add(dirLight);
+
+    // Geometry & Texture
+    const geo = new THREE.SphereGeometry(1, 48, 48);
+    const textureLoader = new THREE.TextureLoader();
+    const texturePath = `/textures/planets/${id}.jpg`;
+
+    let material;
+    const texture = textureLoader.load(
+      texturePath,
+      undefined,
+      undefined,
+      () => console.warn(`Fallback texture for ${id}`)
+    );
+
+    if (id === 'sun') {
+      material = new THREE.MeshBasicMaterial({ map: texture });
+    } else {
+      material = new THREE.MeshPhongMaterial({
+        map: texture,
+        shininess: 12,
+      });
+    }
+
+    const mesh = new THREE.Mesh(geo, material);
+    scene.add(mesh);
+
+    // Saturn Ring
+    let saturnRingMesh = null;
+    if (id === 'saturn') {
+      const ringGeo = new THREE.RingGeometry(1.25, 2.0, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        map: textureLoader.load('/textures/planets/saturnring.jpg'),
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85,
+      });
+      saturnRingMesh = new THREE.Mesh(ringGeo, ringMat);
+      saturnRingMesh.rotation.x = Math.PI / 2.3;
+      scene.add(saturnRingMesh);
+    }
+
+    let animId;
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      mesh.rotation.y += 0.008;
+      if (saturnRingMesh) saturnRingMesh.rotation.z += 0.003;
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      if (renderer.domElement && container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+      geo.dispose();
+      material.dispose();
+    };
+  }, [id, sizePx]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{ width: `${sizePx}px`, height: `${sizePx}px` }}
+      className="flex items-center justify-center transition-all duration-700 ease-out cursor-grab active:cursor-grabbing hover:scale-105"
+    />
+  );
+}
+
 export default function PlanetScaleComparisonSection() {
   const [leftId, setLeftId] = useState('jupiter');
   const [rightId, setRightId] = useState('earth');
@@ -23,10 +124,10 @@ export default function PlanetScaleComparisonSection() {
   const leftObj = CELESTIAL_BODIES.find((b) => b.id === leftId);
   const rightObj = CELESTIAL_BODIES.find((b) => b.id === rightId);
 
-  // Calculate relative sizes for display (max size capped at 220px)
+  // Calculate relative sizes for display (max size capped at 210px, min at 40px)
   const maxDiameter = Math.max(leftObj.diameterKm, rightObj.diameterKm);
-  const leftPx = Math.max(28, Math.round((leftObj.diameterKm / maxDiameter) * 200));
-  const rightPx = Math.max(28, Math.round((rightObj.diameterKm / maxDiameter) * 200));
+  const leftPx = Math.max(40, Math.round((leftObj.diameterKm / maxDiameter) * 210));
+  const rightPx = Math.max(40, Math.round((rightObj.diameterKm / maxDiameter) * 210));
 
   const timesLarger = (leftObj.diameterKm / rightObj.diameterKm).toFixed(1);
   const isLeftLarger = leftObj.diameterKm >= rightObj.diameterKm;
@@ -37,13 +138,13 @@ export default function PlanetScaleComparisonSection() {
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
           <Scale className="w-4 h-4" />
-          <span>Alat Perbandingan Interaktif</span>
+          <span>Alat Perbandingan 3D Interaktif</span>
         </div>
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
-          Perbandingan Ukuran Skala Kosmik
+          Perbandingan Ukuran Skala Kosmik 3D
         </h2>
         <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
-          Pilih dua objek tata surya di bawah ini untuk melihat perbedaan diameter dan proporsi skalanya secara langsung!
+          Pilih dua objek tata surya di bawah ini untuk melihat simulasi bola 3D dengan tekstur asli NASA dan proporsi skala yang akurat!
         </p>
       </div>
 
@@ -100,23 +201,21 @@ export default function PlanetScaleComparisonSection() {
           </div>
         </div>
 
-        {/* Visual Side-by-Side Arena */}
-        <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-6 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-around gap-8 min-h-[340px] relative overflow-hidden">
-          {/* Left Object Circle */}
+        {/* Visual Side-by-Side 3D Arena */}
+        <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-6 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-around gap-8 min-h-[360px] relative overflow-hidden">
+          {/* Left Object 3D Canvas */}
           <div className="flex flex-col items-center justify-center flex-1 text-center group">
-            <div className="h-56 flex items-center justify-center relative w-full">
-              <div
-                style={{ width: `${leftPx}px`, height: `${leftPx}px` }}
-                className={`rounded-full bg-gradient-to-br ${leftObj.color} ${leftObj.shadow} shadow-2xl transition-all duration-700 ease-out flex items-center justify-center relative group-hover:scale-105`}
-              >
-                <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </div>
+            <div className="h-60 flex items-center justify-center relative w-full">
+              <PlanetSphere3D id={leftObj.id} sizePx={leftPx} />
             </div>
             <div className="mt-4">
               <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/20">
                 {leftObj.category}
               </span>
-              <h3 className="text-2xl font-bold text-white mt-2">{leftObj.name}</h3>
+              <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
+                {leftObj.name}
+                <RotateCw className="w-4 h-4 text-cyan-400 animate-spin-slow opacity-60" />
+              </h3>
               <p className="text-sm text-gray-400 mt-1">Diameter: <strong className="text-white">{leftObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
               <p className="text-xs text-gray-500 mt-0.5">{leftObj.ratioToEarth}× Ukuran Bumi</p>
             </div>
@@ -138,21 +237,19 @@ export default function PlanetScaleComparisonSection() {
             </div>
           </div>
 
-          {/* Right Object Circle */}
+          {/* Right Object 3D Canvas */}
           <div className="flex flex-col items-center justify-center flex-1 text-center group">
-            <div className="h-56 flex items-center justify-center relative w-full">
-              <div
-                style={{ width: `${rightPx}px`, height: `${rightPx}px` }}
-                className={`rounded-full bg-gradient-to-br ${rightObj.color} ${rightObj.shadow} shadow-2xl transition-all duration-700 ease-out flex items-center justify-center relative group-hover:scale-105`}
-              >
-                <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </div>
+            <div className="h-60 flex items-center justify-center relative w-full">
+              <PlanetSphere3D id={rightObj.id} sizePx={rightPx} />
             </div>
             <div className="mt-4">
               <span className="text-xs font-semibold uppercase tracking-wider text-purple-400 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/20">
                 {rightObj.category}
               </span>
-              <h3 className="text-2xl font-bold text-white mt-2">{rightObj.name}</h3>
+              <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
+                {rightObj.name}
+                <RotateCw className="w-4 h-4 text-purple-400 animate-spin-slow opacity-60" />
+              </h3>
               <p className="text-sm text-gray-400 mt-1">Diameter: <strong className="text-white">{rightObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
               <p className="text-xs text-gray-500 mt-0.5">{rightObj.ratioToEarth}× Ukuran Bumi</p>
             </div>
