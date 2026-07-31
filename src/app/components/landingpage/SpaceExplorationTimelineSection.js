@@ -142,13 +142,13 @@ export default function SpaceExplorationTimelineSection() {
               <span className="w-2 h-2 rounded-full bg-purple-300"></span>
             </div>
 
-            {/* Year Badge on the left for desktop */}
-            <div className="md:absolute md:-left-36 md:top-1 text-cyan-400 font-extrabold text-lg md:text-xl tracking-wider mb-2 md:mb-0 md:w-28 md:text-right">
+            {/* Year Badge on the left for desktop (Clean 16px gap to the left of vertical line) */}
+            <div className="md:absolute md:-left-[152px] md:top-1 text-cyan-400 font-extrabold text-lg md:text-xl tracking-wider mb-2 md:mb-0 md:w-24 md:text-right">
               {evt.year}
             </div>
 
             {/* Card Content */}
-            <div className="bg-slate-900/70 border border-slate-800/80 hover:border-purple-500/50 rounded-2xl p-6 backdrop-blur-xl transition-all shadow-xl hover:shadow-purple-500/10">
+            <div className="bg-slate-950/90 md:bg-slate-900/70 border border-slate-800/80 hover:border-purple-500/50 rounded-2xl p-6 backdrop-blur-none md:backdrop-blur-xl transition-all shadow-xl hover:shadow-purple-500/10">
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${evt.badgeColor}`}>
                   {evt.category}

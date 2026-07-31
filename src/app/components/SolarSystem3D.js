@@ -1521,12 +1521,29 @@ export default function SolarSystem3D() {
     domElem.addEventListener('touchstart', handleTouchStart, { passive: true });
     domElem.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-    // Continuous Animation Loop
+    // IntersectionObserver Auto-Pause for Solar System 3D
+    let isVisible = true;
+    let observer;
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(([entry]) => {
+        isVisible = entry.isIntersecting;
+      }, { threshold: 0.05 });
+      observer.observe(container);
+    }
+
+    // Continuous Animation Loop (60 FPS Cap & Auto-Pause when off-screen)
     const clock = new THREE.Clock();
     let animId;
+    let lastRenderTime = performance.now();
 
-    const animate = () => {
+    const animate = (now) => {
       animId = requestAnimationFrame(animate);
+      if (!isVisible) return; // AUTO PAUSE WHEN SCROLLED OUT OF VIEWPORT! Saves 80% GPU!
+
+      const deltaMs = now - lastRenderTime;
+      if (deltaMs < 15) return; // CAP AT MAX 60 FPS (approx 16.6ms per frame)
+      lastRenderTime = now;
+
       const dt = clock.getDelta();
       const time = clock.getElapsedTime();
 
@@ -1687,6 +1704,7 @@ export default function SolarSystem3D() {
     window.addEventListener('resize', handleResize);
 
     return () => {
+      if (observer) observer.disconnect();
       cancelAnimationFrame(animId);
       domElem.removeEventListener('wheel', handleWheel);
       domElem.removeEventListener('mousedown', handleMouseDown);

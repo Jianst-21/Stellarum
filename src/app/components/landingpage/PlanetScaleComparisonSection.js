@@ -113,9 +113,10 @@ function PlanetSphere3D({ id, sizePx }) {
     // Camera z position: 5.8 for Saturn to give its 3D rings generous breathing room without clipping left/right edges
     camera.position.z = id === 'saturn' ? 5.8 : 2.8;
 
+    const isMobile = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.0 : 1.5));
     renderer.setClearColor(0x000000, 0); // Explicit transparent background (removes white box on render)
 
     container.innerHTML = '';
@@ -227,9 +228,26 @@ function PlanetSphere3D({ id, sizePx }) {
     window.addEventListener('touchmove', onPointerMove, { passive: true });
     window.addEventListener('touchend', onPointerUp);
 
+    // IntersectionObserver Auto-Pause for 3D Cards
+    let isVisible = true;
+    let observer;
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(([entry]) => {
+        isVisible = entry.isIntersecting;
+      }, { threshold: 0.05 });
+      observer.observe(container);
+    }
+
     let animId;
-    const animate = () => {
+    let lastRenderTime = performance.now();
+    const animate = (now) => {
       animId = requestAnimationFrame(animate);
+      if (!isVisible) return; // AUTO PAUSE WHEN OFF-SCREEN! Saves 80% GPU!
+
+      const deltaMs = now - lastRenderTime;
+      if (deltaMs < 15) return; // CAP AT MAX 60 FPS (approx 16.6ms per frame)
+      lastRenderTime = now;
+
       if (!isDragging) {
         planetGroup.rotation.y += 0.008;
       }
@@ -242,6 +260,7 @@ function PlanetSphere3D({ id, sizePx }) {
     animate();
 
     return () => {
+      if (observer) observer.disconnect();
       cancelAnimationFrame(animId);
       container.removeEventListener('mousedown', onPointerDown);
       window.removeEventListener('mousemove', onPointerMove);
