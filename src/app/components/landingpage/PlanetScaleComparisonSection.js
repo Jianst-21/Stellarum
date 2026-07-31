@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { ArrowLeftRight, Info, Sparkles, Scale, ChevronDown, RotateCw, ArrowUpDown, HelpCircle, CheckCircle2, XCircle, RefreshCw, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeftRight, Info, Sparkles, Scale, ChevronDown, RotateCw, ArrowUpDown, Trophy, CheckCircle2, XCircle, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const CELESTIAL_BODIES = [
   { id: 'sun', name: 'Matahari', diameterKm: 1392700, distKm: 0, tempC: 5500, ratioToEarth: 109.2, color: 'from-amber-400 to-orange-600', shadow: 'shadow-orange-500/50', category: 'Bintang', description: '99.8% dari seluruh massa Tata Surya. Bisa memuat 1.300.000 planet Bumi di dalamnya.' },
@@ -30,7 +30,7 @@ const PLANET_COLORS = {
   moon: 0x9e9e9e,
 };
 
-// Global Texture Cache for high performance (prevents re-downloading)
+// Global Texture Cache for high performance
 const globalTextureLoader = new THREE.TextureLoader();
 const textureMapCache = new Map();
 
@@ -60,7 +60,40 @@ const getLogScalePx = (diameterKm, minPx = 65, maxPx = 135) => {
   return Math.round(minPx + ratio * (maxPx - minPx));
 };
 
-// Lightweight 3D Sphere Renderer with NASA texture and thorough WebGL cleanup
+// Starfield + Grid background overlay matching Tata Surya 3D atmosphere (Gambar 2)
+function SpaceStarfieldBackground() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-3xl">
+      {/* Base pitch black space */}
+      <div className="absolute inset-0 bg-[#03040a]" />
+
+      {/* Scattered Cyan & White Star Dots */}
+      <div
+        className="absolute inset-0 opacity-60"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 12% 18%, rgba(34, 211, 238, 0.9) 1px, transparent 1.5px),
+            radial-gradient(circle at 45% 75%, rgba(255, 255, 255, 0.85) 1px, transparent 1.5px),
+            radial-gradient(circle at 82% 28%, rgba(34, 211, 238, 0.85) 1.2px, transparent 1.8px),
+            radial-gradient(circle at 65% 85%, rgba(255, 255, 255, 0.75) 1px, transparent 1.5px),
+            radial-gradient(circle at 25% 62%, rgba(34, 211, 238, 0.9) 1px, transparent 1.5px),
+            radial-gradient(circle at 92% 78%, rgba(34, 211, 238, 0.85) 1px, transparent 1.5px),
+            radial-gradient(circle at 38% 14%, rgba(255, 255, 255, 0.9) 1px, transparent 1.5px),
+            radial-gradient(circle at 72% 48%, rgba(34, 211, 238, 0.9) 1.4px, transparent 2px),
+            radial-gradient(circle at 10% 88%, rgba(255, 255, 255, 0.8) 1px, transparent 1.5px),
+            radial-gradient(circle at 55% 32%, rgba(34, 211, 238, 0.85) 1px, transparent 1.5px)
+          `,
+          backgroundSize: '200px 200px',
+        }}
+      />
+
+      {/* Grid lines overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(34,211,238,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.06)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]" />
+    </div>
+  );
+}
+
+// 3D Sphere Renderer with Unified Group Rotation (Saturn sphere + ring rotate together)
 function PlanetSphere3D({ id, sizePx }) {
   const containerRef = useRef(null);
 
@@ -73,7 +106,7 @@ function PlanetSphere3D({ id, sizePx }) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    // Camera z position: 5.8 for Saturn to give its 3D rings generous breathing room without clipping left/right edges
+    // Camera z position: 5.8 for Saturn to give its 3D rings generous margins on all sides without clipping
     camera.position.z = id === 'saturn' ? 5.8 : 2.8;
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -96,7 +129,10 @@ function PlanetSphere3D({ id, sizePx }) {
       scene.add(fillLight);
     }
 
-    // Geometry (32x32 for high FPS performance)
+    // Unified Group so sphere AND Saturn ring rotate together in 3D space
+    const planetGroup = new THREE.Group();
+    scene.add(planetGroup);
+
     const geo = new THREE.SphereGeometry(1, 32, 32);
     const baseColor = PLANET_COLORS[id] || 0xcccccc;
 
@@ -111,7 +147,7 @@ function PlanetSphere3D({ id, sizePx }) {
     }
 
     const mesh = new THREE.Mesh(geo, material);
-    scene.add(mesh);
+    planetGroup.add(mesh);
 
     // Apply Cached Texture
     getCachedTexture(id, (loadedTex) => {
@@ -119,7 +155,6 @@ function PlanetSphere3D({ id, sizePx }) {
       material.needsUpdate = true;
     });
 
-    let saturnRingMesh = null;
     if (id === 'saturn') {
       const ringGeo = new THREE.RingGeometry(1.15, 1.70, 64);
       // Radial UV Mapping Fix so saturnring.jpg renders concentric ring bands
@@ -140,9 +175,9 @@ function PlanetSphere3D({ id, sizePx }) {
         transparent: true,
         opacity: 0.90,
       });
-      saturnRingMesh = new THREE.Mesh(ringGeo, ringMat);
+      const saturnRingMesh = new THREE.Mesh(ringGeo, ringMat);
       saturnRingMesh.rotation.x = Math.PI / 2.3;
-      scene.add(saturnRingMesh);
+      planetGroup.add(saturnRingMesh); // Add inside planetGroup so it rotates with planet!
     }
 
     // Interactive Drag-to-Rotate Mouse & Touch Controls
@@ -165,11 +200,8 @@ function PlanetSphere3D({ id, sizePx }) {
       const deltaX = clientX - prevX;
       const deltaY = clientY - prevY;
 
-      mesh.rotation.y += deltaX * 0.012;
-      mesh.rotation.x += deltaY * 0.012;
-      if (saturnRingMesh) {
-        saturnRingMesh.rotation.z += deltaX * 0.008;
-      }
+      planetGroup.rotation.y += deltaX * 0.012;
+      planetGroup.rotation.x += deltaY * 0.012;
 
       prevX = clientX;
       prevY = clientY;
@@ -192,8 +224,7 @@ function PlanetSphere3D({ id, sizePx }) {
     const animate = () => {
       animId = requestAnimationFrame(animate);
       if (!isDragging) {
-        mesh.rotation.y += 0.008;
-        if (saturnRingMesh) saturnRingMesh.rotation.z += 0.003;
+        planetGroup.rotation.y += 0.008;
       }
       renderer.render(scene, camera);
     };
@@ -229,7 +260,7 @@ function PlanetSphere3D({ id, sizePx }) {
 }
 
 export default function PlanetScaleComparisonSection() {
-  const [activeTab, setActiveTab] = useState('compare'); // 'compare' | 'lineup' | 'quiz'
+  const [activeTab, setActiveTab] = useState('compare');
 
   // 1-on-1 Compare State
   const [leftId, setLeftId] = useState('jupiter');
@@ -380,9 +411,9 @@ export default function PlanetScaleComparisonSection() {
 
       {/* TAB 1: 1-VS-1 COMPARE */}
       {activeTab === 'compare' && (
-        <div className="bg-[#05060f] border border-cyan-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(34,211,238,0.12)] relative overflow-hidden animate-fadeIn">
-          {/* Subtle grid pattern background like Solar System Card */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+        <div className="bg-[#05060f] border border-cyan-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(34,211,238,0.15)] relative overflow-hidden animate-fadeIn">
+          {/* Starfield + Grid background matching Gambar 2 */}
+          <SpaceStarfieldBackground />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
             <div className="flex flex-col gap-2">
@@ -428,29 +459,31 @@ export default function PlanetScaleComparisonSection() {
             </div>
           </div>
 
-          <div className="bg-[#03040a] border border-cyan-500/40 rounded-2xl p-6 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-around gap-8 min-h-[360px] relative overflow-hidden shadow-2xl">
+          <div className="bg-[#03040a]/90 border border-cyan-500/40 rounded-2xl p-6 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-around gap-8 min-h-[360px] relative overflow-hidden shadow-2xl z-10">
+            <SpaceStarfieldBackground />
+
             <div className="flex flex-col items-center justify-center flex-1 text-center group z-10">
               <div className="h-60 flex items-center justify-center relative w-full">
                 <PlanetSphere3D id={leftObj.id} sizePx={leftPx} />
               </div>
               <div className="mt-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30">
+                <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 shadow-md">
                   {leftObj.category}
                 </span>
                 <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
                   {leftObj.name}
-                  <RotateCw className="w-4 h-4 text-cyan-400 animate-spin-slow opacity-60" />
+                  <RotateCw className="w-4 h-4 text-cyan-400 opacity-60" />
                 </h3>
-                <p className="text-sm text-gray-400 mt-1">Diameter: <strong className="text-white">{leftObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
-                <p className="text-xs text-gray-500 mt-0.5">{leftObj.ratioToEarth}× Ukuran Bumi</p>
+                <p className="text-sm text-gray-300 mt-1">Diameter: <strong className="text-white">{leftObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
+                <p className="text-xs text-gray-400 mt-0.5">{leftObj.ratioToEarth}× Ukuran Bumi</p>
               </div>
             </div>
 
             <div className="flex flex-col items-center justify-center z-10">
-              <div className="w-12 h-12 rounded-full bg-[#05060f] border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold shadow-lg my-2">
+              <div className="w-12 h-12 rounded-full bg-[#05060f] border border-cyan-500/50 flex items-center justify-center text-cyan-400 font-bold shadow-lg my-2">
                 <ArrowLeftRight className="w-5 h-5 text-cyan-400" />
               </div>
-              <div className="bg-[#05060f] border border-cyan-500/40 rounded-xl px-4 py-2 text-center backdrop-blur-md shadow-xl max-w-[200px]">
+              <div className="bg-[#05060f]/95 border border-cyan-500/40 rounded-xl px-4 py-2 text-center backdrop-blur-md shadow-xl max-w-[200px]">
                 <span className="text-xs text-gray-400 block">Rasio Ukuran</span>
                 <span className="text-lg font-extrabold text-cyan-300">{timesLarger}×</span>
                 <span className="text-[11px] text-gray-400 block mt-0.5">
@@ -464,32 +497,32 @@ export default function PlanetScaleComparisonSection() {
                 <PlanetSphere3D id={rightObj.id} sizePx={rightPx} />
               </div>
               <div className="mt-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-purple-400 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/30">
+                <span className="text-xs font-semibold uppercase tracking-wider text-purple-400 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-500/40 shadow-md">
                   {rightObj.category}
                 </span>
                 <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
                   {rightObj.name}
-                  <RotateCw className="w-4 h-4 text-purple-400 animate-spin-slow opacity-60" />
+                  <RotateCw className="w-4 h-4 text-purple-400 opacity-60" />
                 </h3>
-                <p className="text-sm text-gray-400 mt-1">Diameter: <strong className="text-white">{rightObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
-                <p className="text-xs text-gray-500 mt-0.5">{rightObj.ratioToEarth}× Ukuran Bumi</p>
+                <p className="text-sm text-gray-300 mt-1">Diameter: <strong className="text-white">{rightObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
+                <p className="text-xs text-gray-400 mt-0.5">{rightObj.ratioToEarth}× Ukuran Bumi</p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-            <div className="bg-[#03040a] border border-cyan-500/30 rounded-2xl p-4 flex items-start gap-3">
+            <div className="bg-[#03040a]/90 border border-cyan-500/30 rounded-2xl p-4 flex items-start gap-3">
               <Info className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-white">{leftObj.name}</h4>
-                <p className="text-xs text-gray-400 mt-1 leading-relaxed">{leftObj.description}</p>
+                <p className="text-xs text-gray-300 mt-1 leading-relaxed">{leftObj.description}</p>
               </div>
             </div>
-            <div className="bg-[#03040a] border border-purple-500/30 rounded-2xl p-4 flex items-start gap-3">
+            <div className="bg-[#03040a]/90 border border-purple-500/30 rounded-2xl p-4 flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-white">{rightObj.name}</h4>
-                <p className="text-xs text-gray-400 mt-1 leading-relaxed">{rightObj.description}</p>
+                <p className="text-xs text-gray-300 mt-1 leading-relaxed">{rightObj.description}</p>
               </div>
             </div>
           </div>
@@ -498,9 +531,8 @@ export default function PlanetScaleComparisonSection() {
 
       {/* TAB 2: LINEUP & SORTING 3D */}
       {activeTab === 'lineup' && (
-        <div className="bg-[#05060f] border border-purple-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(168,85,247,0.12)] relative overflow-hidden animate-fadeIn">
-          {/* Subtle grid pattern background */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+        <div className="bg-[#05060f] border border-purple-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(168,85,247,0.15)] relative overflow-hidden animate-fadeIn">
+          <SpaceStarfieldBackground />
 
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b border-purple-900/40 relative z-10">
             <div>
@@ -554,15 +586,16 @@ export default function PlanetScaleComparisonSection() {
               return (
                 <div
                   key={b.id}
-                  className="flex flex-col items-center justify-between bg-[#03040a] border border-purple-500/30 hover:border-purple-400 rounded-2xl p-5 shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all group relative"
+                  className="flex flex-col items-center justify-between bg-[#03040a]/90 border border-purple-500/30 hover:border-purple-400 rounded-2xl p-5 shadow-xl hover:shadow-[0_0_24px_rgba(168,85,247,0.25)] transition-all group relative overflow-hidden"
                 >
-                  <span className="text-[10px] font-black tracking-widest text-purple-400 bg-purple-950/60 px-3 py-0.5 rounded-full border border-purple-500/30 mb-2 shadow-md">
+                  <SpaceStarfieldBackground />
+                  <span className="text-[10px] font-black tracking-widest text-purple-400 bg-purple-950/80 px-3 py-0.5 rounded-full border border-purple-500/40 mb-2 shadow-md z-10">
                     #{globalRank}
                   </span>
-                  <div className="h-44 flex items-center justify-center w-full my-auto">
+                  <div className="h-44 flex items-center justify-center w-full my-auto z-10">
                     <PlanetSphere3D id={b.id} sizePx={px} />
                   </div>
-                  <div className="text-center mt-3">
+                  <div className="text-center mt-3 z-10">
                     <h4 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">{b.name}</h4>
                     <p className="text-xs text-purple-400 font-semibold mt-1">
                       {sortCriteria === 'diameterDesc' && `${b.diameterKm.toLocaleString('id-ID')} km`}
@@ -579,9 +612,8 @@ export default function PlanetScaleComparisonSection() {
 
       {/* TAB 3: MINI QUIZ SORTING */}
       {activeTab === 'quiz' && (
-        <div className="bg-[#05060f] border border-amber-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(245,158,11,0.12)] relative overflow-hidden animate-fadeIn">
-          {/* Subtle grid pattern background */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+        <div className="bg-[#05060f] border border-amber-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(245,158,11,0.15)] relative overflow-hidden animate-fadeIn">
+          <SpaceStarfieldBackground />
 
           <div className="text-center max-w-xl mx-auto mb-8 relative z-10">
             <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider">
@@ -600,14 +632,15 @@ export default function PlanetScaleComparisonSection() {
             {userOrder.map((item, idx) => (
               <div
                 key={item.id}
-                className="bg-[#03040a] border border-amber-500/30 hover:border-amber-400 rounded-2xl p-4 flex flex-col items-center relative group hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all"
+                className="bg-[#03040a]/90 border border-amber-500/30 hover:border-amber-400 rounded-2xl p-4 flex flex-col items-center relative group hover:shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-all overflow-hidden"
               >
-                <div className="absolute top-3 left-3 w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs flex items-center justify-center">
+                <SpaceStarfieldBackground />
+                <div className="absolute top-3 left-3 w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs flex items-center justify-center z-10">
                   #{idx + 1}
                 </div>
 
                 {/* Move Controls */}
-                <div className="absolute top-3 right-3 flex gap-1">
+                <div className="absolute top-3 right-3 flex gap-1 z-10">
                   <button
                     onClick={() => moveQuizItem(idx, idx - 1)}
                     disabled={idx === 0}
@@ -626,15 +659,15 @@ export default function PlanetScaleComparisonSection() {
                   </button>
                 </div>
 
-                <div className="h-36 flex items-center justify-center mt-6 w-full">
+                <div className="h-36 flex items-center justify-center mt-6 w-full z-10">
                   <PlanetSphere3D id={item.id} sizePx={90} />
                 </div>
 
-                <h4 className="text-base font-bold text-white mt-2">{item.name}</h4>
-                <p className="text-xs text-gray-400 mt-0.5">{item.category}</p>
+                <h4 className="text-base font-bold text-white mt-2 z-10">{item.name}</h4>
+                <p className="text-xs text-gray-400 mt-0.5 z-10">{item.category}</p>
 
                 {quizChecked && (
-                  <span className="text-xs font-semibold text-amber-300 mt-2 px-2.5 py-1 rounded-md bg-amber-950/60 border border-amber-500/30">
+                  <span className="text-xs font-semibold text-amber-300 mt-2 px-2.5 py-1 rounded-md bg-amber-950/80 border border-amber-500/40 z-10">
                     {item.diameterKm.toLocaleString('id-ID')} km
                   </span>
                 )}
