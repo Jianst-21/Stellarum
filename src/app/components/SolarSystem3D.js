@@ -576,9 +576,22 @@ export default function SolarSystem3D() {
   const mountRef = useRef(null);
   const selectedIdRef = useRef(null);
   const isResettingZoomRef = useRef(false);
+  const isTouch3DModeRef = useRef(true);
   const [selectedId, setSelectedId] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTouch3DMode, setIsTouch3DMode] = useState(true);
+
+  const toggleTouch3DMode = () => {
+    const nextMode = !isTouch3DMode;
+    setIsTouch3DMode(nextMode);
+    isTouch3DModeRef.current = nextMode;
+    if (domElemRef.current) {
+      domElemRef.current.style.touchAction = nextMode ? 'none' : 'pan-y';
+    }
+  };
+
+  const domElemRef = useRef(null);
 
   const handleSelectObject = (id) => {
     isResettingZoomRef.current = false;
@@ -668,11 +681,15 @@ export default function SolarSystem3D() {
       }
     }, { passive: true });
 
+    domElemRef.current = domElem;
+
     domElem.addEventListener('touchmove', (e) => {
-      e.preventDefault();
+      if (!isTouch3DModeRef.current) return;
       if (e.touches.length === 1) {
+        e.preventDefault();
         dragMove(e.touches[0].clientX, e.touches[0].clientY);
       } else if (e.touches.length === 2) {
+        e.preventDefault();
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
@@ -700,7 +717,7 @@ export default function SolarSystem3D() {
       controls.radius = Math.max(controls.minRadius, Math.min(controls.maxRadius, controls.radius));
     };
     domElem.addEventListener('wheel', handleWheel, { passive: false });
-    domElem.style.touchAction = 'none';
+    domElem.style.touchAction = isTouch3DModeRef.current ? 'none' : 'pan-y';
 
     // Lights
     const ambient = new THREE.AmbientLight(0xffffff, 2.5);
@@ -1514,7 +1531,7 @@ export default function SolarSystem3D() {
   const activeData = selectedId ? OBJECT_DATA[selectedId] : null;
 
   return (
-    <div className="relative w-full h-[750px] overflow-hidden rounded-2xl bg-[#05060f] border border-[#22D3EE]/40 shadow-[0_0_50px_rgba(34,211,238,0.2)]">
+    <div className="relative w-full h-[460px] sm:h-[600px] md:h-[720px] overflow-hidden rounded-2xl bg-[#05060f] border border-[#22D3EE]/40 shadow-[0_0_50px_rgba(34,211,238,0.2)]">
       {isLoading && (
         <div className="absolute inset-0 bg-[#05060f] z-50 flex items-center justify-center text-[#22D3EE] font-['Geist'] text-sm tracking-widest">
           MEMUAT TATA SURYA 3D...
@@ -1524,14 +1541,39 @@ export default function SolarSystem3D() {
       {/* 3D Canvas mount */}
       <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
-      {/* HUD Top Header */}
-      <div className="absolute top-0 left-0 w-full p-6 pointer-events-none z-10">
-        <h2 className="text-[#ffffff] font-['Sora'] text-xl font-semibold tracking-wide shadow-sm">
-          Tata Surya Interaktif 3D
-        </h2>
-        <p className="text-[#22D3EE] font-['Hanken_Grotesk'] text-xs mt-1 font-medium">
-          Klik planet, bulan, asteroid, komet, atau wahana antariksa untuk melihat detail · Drag untuk memutar · Scroll/Pinch untuk zoom
-        </p>
+      {/* HUD Top Header & Mobile Touch Toggle */}
+      <div className="absolute top-0 left-0 w-full p-4 sm:p-6 pointer-events-none z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-[#ffffff] font-['Sora'] text-base sm:text-xl font-semibold tracking-wide shadow-sm">
+            Tata Surya Interaktif 3D
+          </h2>
+          <p className="text-[#22D3EE] font-['Hanken_Grotesk'] text-[11px] sm:text-xs mt-0.5 font-medium">
+            Klik objek · Drag untuk memutar · Scroll/Pinch untuk zoom
+          </p>
+        </div>
+
+        {/* Mobile Toggle Button for Page Scroll vs 3D Orbit */}
+        <button
+          onClick={toggleTouch3DMode}
+          className="pointer-events-auto self-start sm:self-auto px-3.5 py-1.5 rounded-full text-xs font-bold font-['Geist'] border transition-all cursor-pointer shadow-lg backdrop-blur-sm flex items-center gap-1.5"
+          style={{
+            backgroundColor: isTouch3DMode ? 'rgba(34, 211, 238, 0.15)' : 'rgba(255, 255, 255, 0.1)',
+            borderColor: isTouch3DMode ? '#22D3EE' : 'rgba(255, 255, 255, 0.3)',
+            color: isTouch3DMode ? '#22D3EE' : '#ffffff',
+          }}
+        >
+          {isTouch3DMode ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse" />
+              <span>🔓 Sentuh 3D: Aktif</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-white/60" />
+              <span>🔒 Mode Scroll Halaman</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Info Panel HUD Modal (Optimized CSS without laggy backdrop-blur) */}

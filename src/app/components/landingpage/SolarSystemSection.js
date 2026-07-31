@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 const SolarSystem3D = dynamic(() => import('@/app/components/SolarSystem3D'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[750px] bg-[#05060f] rounded-2xl border border-[#22D3EE]/30 flex items-center justify-center text-[#22D3EE] font-['Geist'] text-sm tracking-widest">
+    <div className="w-full h-[460px] sm:h-[600px] md:h-[720px] bg-[#05060f] rounded-2xl border border-[#22D3EE]/30 flex items-center justify-center text-[#22D3EE] font-['Geist'] text-sm tracking-widest">
       MEMUAT TATA SURYA 3D...
     </div>
   ),
