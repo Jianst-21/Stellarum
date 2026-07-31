@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeftRight, Info, Sparkles, Scale } from 'lucide-react';
+import { ArrowLeftRight, Info, Sparkles, Scale, ChevronDown } from 'lucide-react';
 
 const CELESTIAL_BODIES = [
   { id: 'sun', name: 'Matahari', diameterKm: 1392700, ratioToEarth: 109.2, color: 'from-amber-400 to-orange-600', shadow: 'shadow-orange-500/50', category: 'Bintang', description: '99.8% dari seluruh massa Tata Surya. Bisa memuat 1.300.000 planet Bumi di dalamnya.' },
@@ -61,17 +61,20 @@ export default function PlanetScaleComparisonSection() {
               <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
               Objek Pertama (Kiri)
             </label>
-            <select
-              value={leftId}
-              onChange={(e) => setLeftId(e.target.value)}
-              className="bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:border-cyan-400 transition-all cursor-pointer"
-            >
-              {CELESTIAL_BODIES.map((b) => (
-                <option key={b.id} value={b.id} className="bg-slate-900 text-white">
-                  {b.name} ({b.diameterKm.toLocaleString('id-ID')} km)
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={leftId}
+                onChange={(e) => setLeftId(e.target.value)}
+                className="w-full appearance-none bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all cursor-pointer shadow-lg"
+              >
+                {CELESTIAL_BODIES.map((b) => (
+                  <option key={b.id} value={b.id} className="bg-slate-900 text-white py-1">
+                    {b.name} ({b.diameterKm.toLocaleString('id-ID')} km)
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
+            </div>
           </div>
 
           {/* Right Selector */}
@@ -80,17 +83,20 @@ export default function PlanetScaleComparisonSection() {
               <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse"></span>
               Objek Kedua (Kanan)
             </label>
-            <select
-              value={rightId}
-              onChange={(e) => setRightId(e.target.value)}
-              className="bg-slate-950/80 border border-purple-500/40 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:border-purple-400 transition-all cursor-pointer"
-            >
-              {CELESTIAL_BODIES.map((b) => (
-                <option key={b.id} value={b.id} className="bg-slate-900 text-white">
-                  {b.name} ({b.diameterKm.toLocaleString('id-ID')} km)
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={rightId}
+                onChange={(e) => setRightId(e.target.value)}
+                className="w-full appearance-none bg-slate-950/90 border border-purple-500/40 hover:border-purple-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer shadow-lg"
+              >
+                {CELESTIAL_BODIES.map((b) => (
+                  <option key={b.id} value={b.id} className="bg-slate-900 text-white py-1">
+                    {b.name} ({b.diameterKm.toLocaleString('id-ID')} km)
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none" />
+            </div>
           </div>
         </div>
 
