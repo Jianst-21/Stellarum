@@ -30,6 +30,16 @@ const PLANET_COLORS = {
   moon: 0x9e9e9e,
 };
 
+// Helper for Perceptual Logarithmic 3D Showcase Scaling
+// Prevents tiny planets from collapsing to identical min dots when compared to Sun
+const getLogScalePx = (diameterKm, minPx = 65, maxPx = 135) => {
+  const minLog = Math.log(3474);     // Moon
+  const maxLog = Math.log(1392700);  // Sun
+  const currentLog = Math.log(diameterKm);
+  const ratio = (currentLog - minLog) / (maxLog - minLog);
+  return Math.round(minPx + ratio * (maxPx - minPx));
+};
+
 // Interactive 3D Sphere Renderer with NASA texture
 function PlanetSphere3D({ id, sizePx }) {
   const containerRef = useRef(null);
@@ -43,7 +53,8 @@ function PlanetSphere3D({ id, sizePx }) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-    camera.position.z = 2.8;
+    // Move camera back for Saturn so its 3D rings never get clipped/cut off at top/bottom
+    camera.position.z = id === 'saturn' ? 3.6 : 2.8;
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(width, height);
@@ -95,7 +106,7 @@ function PlanetSphere3D({ id, sizePx }) {
 
     let saturnRingMesh = null;
     if (id === 'saturn') {
-      const ringGeo = new THREE.RingGeometry(1.25, 2.0, 64);
+      const ringGeo = new THREE.RingGeometry(1.15, 1.75, 64);
       const ringMat = new THREE.MeshBasicMaterial({
         map: textureLoader.load('/textures/planets/saturnring.jpg'),
         side: THREE.DoubleSide,
@@ -411,23 +422,22 @@ export default function PlanetScaleComparisonSection() {
             </div>
           </div>
 
-          {/* Horizontal Scrollable 3D Lineup */}
+          {/* Horizontal Scrollable 3D Lineup Showcase */}
           <div className="flex items-end gap-6 overflow-x-auto pb-6 pt-4 snap-x">
             {sortedBodies.map((b, idx) => {
-              const maxD = sortedBodies[0].diameterKm;
-              const px = Math.max(38, Math.round((b.diameterKm / maxD) * 160));
+              const px = getLogScalePx(b.diameterKm, 65, 130);
               return (
                 <div
                   key={b.id}
-                  className="flex flex-col items-center justify-end flex-shrink-0 snap-center bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 min-w-[150px] hover:border-purple-500/50 transition-all group"
+                  className="flex flex-col items-center justify-end flex-shrink-0 snap-center bg-slate-950/70 border border-slate-800/80 hover:border-purple-500/50 rounded-2xl p-5 min-w-[170px] shadow-xl hover:shadow-purple-500/10 transition-all group"
                 >
-                  <span className="text-[10px] font-black tracking-widest text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-500/30 mb-3">
+                  <span className="text-[10px] font-black tracking-widest text-purple-400 bg-purple-950/60 px-2.5 py-0.5 rounded-full border border-purple-500/30 mb-3 shadow-md">
                     #{idx + 1}
                   </span>
-                  <div className="h-44 flex items-center justify-center w-full">
+                  <div className="h-48 flex items-center justify-center w-full">
                     <PlanetSphere3D id={b.id} sizePx={px} />
                   </div>
-                  <h4 className="text-sm font-bold text-white mt-3 group-hover:text-purple-300">{b.name}</h4>
+                  <h4 className="text-sm font-bold text-white mt-3 group-hover:text-purple-300 transition-colors">{b.name}</h4>
                   <p className="text-[11px] text-gray-400 mt-1">
                     {sortCriteria === 'diameterDesc' && `${b.diameterKm.toLocaleString('id-ID')} km`}
                     {sortCriteria === 'distAsc' && (b.distKm === 0 ? 'Pusat' : `${b.distKm} jt km`)}
