@@ -94,9 +94,10 @@ function PlanetStageStarryGrid() {
   );
 }
 
-// 3D Sphere Renderer with Unified Group Rotation (Saturn sphere + ring rotate together)
+// 3D Sphere Renderer with Matte Surface (Non-glossy) and Zero White Flash on Mount
 function PlanetSphere3D({ id, sizePx }) {
   const containerRef = useRef(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -110,9 +111,10 @@ function PlanetSphere3D({ id, sizePx }) {
     // Camera z position: 5.8 for Saturn to give its 3D rings generous breathing room without clipping left/right edges
     camera.position.z = id === 'saturn' ? 5.8 : 2.8;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setClearColor(0x000000, 0); // Explicit transparent background (removes white box on render)
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -121,7 +123,7 @@ function PlanetSphere3D({ id, sizePx }) {
     scene.add(ambient);
 
     if (id !== 'sun') {
-      const keyLight = new THREE.DirectionalLight(0xfff5ea, 2.2);
+      const keyLight = new THREE.DirectionalLight(0xfff5ea, 2.0);
       keyLight.position.set(5, 3, 5);
       scene.add(keyLight);
 
@@ -141,9 +143,11 @@ function PlanetSphere3D({ id, sizePx }) {
     if (id === 'sun') {
       material = new THREE.MeshBasicMaterial({ color: baseColor });
     } else {
-      material = new THREE.MeshPhongMaterial({
+      // Matte realistic surface material (Non-glossy, high roughness)
+      material = new THREE.MeshStandardMaterial({
         color: baseColor,
-        shininess: 15,
+        roughness: 0.85,
+        metalness: 0.05,
       });
     }
 
@@ -178,7 +182,7 @@ function PlanetSphere3D({ id, sizePx }) {
       });
       const saturnRingMesh = new THREE.Mesh(ringGeo, ringMat);
       saturnRingMesh.rotation.x = Math.PI / 2.3;
-      planetGroup.add(saturnRingMesh); // Add inside planetGroup so it rotates with planet!
+      planetGroup.add(saturnRingMesh);
     }
 
     // Interactive Drag-to-Rotate Mouse & Touch Controls
@@ -229,6 +233,10 @@ function PlanetSphere3D({ id, sizePx }) {
       }
       renderer.render(scene, camera);
     };
+
+    // Render initial frame and trigger smooth fade-in
+    renderer.render(scene, camera);
+    setIsLoaded(true);
     animate();
 
     return () => {
@@ -255,7 +263,9 @@ function PlanetSphere3D({ id, sizePx }) {
     <div
       ref={containerRef}
       style={{ width: `${sizePx}px`, height: `${sizePx}px` }}
-      className="flex items-center justify-center transition-all duration-700 ease-out cursor-grab active:cursor-grabbing hover:scale-105"
+      className={`flex items-center justify-center transition-all duration-500 ease-out cursor-grab active:cursor-grabbing hover:scale-105 ${
+        isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+      }`}
     />
   );
 }
