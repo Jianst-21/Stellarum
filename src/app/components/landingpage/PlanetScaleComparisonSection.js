@@ -60,35 +60,37 @@ const getLogScalePx = (diameterKm, minPx = 65, maxPx = 135) => {
   return Math.round(minPx + ratio * (maxPx - minPx));
 };
 
-// Subtle, fine, organic starfield + grid overlay ONLY for 3D planet stage cards
+// Organic, non-symmetric random starfield overlay (NO grid lines, just clean starry space)
 function PlanetStageStarryGrid() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-      {/* Deep black space base */}
+      {/* Deep space black background */}
       <div className="absolute inset-0 bg-[#020307]" />
 
-      {/* Subtle grid lines */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(34,211,238,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.06)_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]" />
-
-      {/* Organic, fine, non-symmetric random stars */}
-      <svg className="absolute inset-0 w-full h-full opacity-45">
-        <circle cx="7%" cy="18%" r="0.75" fill="#22D3EE" opacity="0.8" />
-        <circle cx="19%" cy="72%" r="0.5" fill="#ffffff" opacity="0.6" />
-        <circle cx="31%" cy="34%" r="0.8" fill="#22D3EE" opacity="0.75" />
-        <circle cx="48%" cy="85%" r="0.5" fill="#ffffff" opacity="0.5" />
-        <circle cx="62%" cy="12%" r="0.7" fill="#22D3EE" opacity="0.7" />
-        <circle cx="74%" cy="65%" r="0.5" fill="#ffffff" opacity="0.8" />
-        <circle cx="89%" cy="24%" r="0.6" fill="#22D3EE" opacity="0.65" />
-        <circle cx="94%" cy="79%" r="0.7" fill="#ffffff" opacity="0.7" />
-        <circle cx="14%" cy="48%" r="0.5" fill="#ffffff" opacity="0.5" />
-        <circle cx="42%" cy="22%" r="0.6" fill="#22D3EE" opacity="0.8" />
-        <circle cx="56%" cy="58%" r="0.5" fill="#ffffff" opacity="0.6" />
-        <circle cx="81%" cy="91%" r="0.7" fill="#22D3EE" opacity="0.7" />
-        <circle cx="23%" cy="89%" r="0.6" fill="#ffffff" opacity="0.6" />
-        <circle cx="68%" cy="38%" r="0.5" fill="#22D3EE" opacity="0.7" />
-        <circle cx="5%" cy="82%" r="0.6" fill="#ffffff" opacity="0.5" />
-        <circle cx="51%" cy="41%" r="0.7" fill="#22D3EE" opacity="0.6" />
-        <circle cx="87%" cy="54%" r="0.5" fill="#ffffff" opacity="0.7" />
+      {/* Truly random scattered fine star dots */}
+      <svg className="absolute inset-0 w-full h-full opacity-65">
+        <circle cx="5%" cy="14%" r="0.7" fill="#22D3EE" opacity="0.8" />
+        <circle cx="12%" cy="68%" r="0.9" fill="#ffffff" opacity="0.65" />
+        <circle cx="18%" cy="29%" r="1.1" fill="#22D3EE" opacity="0.85" />
+        <circle cx="24%" cy="84%" r="0.6" fill="#ffffff" opacity="0.5" />
+        <circle cx="33%" cy="11%" r="0.8" fill="#ffffff" opacity="0.75" />
+        <circle cx="39%" cy="47%" r="0.5" fill="#22D3EE" opacity="0.6" />
+        <circle cx="45%" cy="88%" r="0.9" fill="#ffffff" opacity="0.7" />
+        <circle cx="52%" cy="23%" r="0.6" fill="#22D3EE" opacity="0.8" />
+        <circle cx="58%" cy="63%" r="1.0" fill="#ffffff" opacity="0.8" />
+        <circle cx="64%" cy="16%" r="0.5" fill="#22D3EE" opacity="0.65" />
+        <circle cx="71%" cy="79%" r="0.8" fill="#ffffff" opacity="0.75" />
+        <circle cx="77%" cy="37%" r="0.6" fill="#22D3EE" opacity="0.7" />
+        <circle cx="83%" cy="92%" r="0.9" fill="#ffffff" opacity="0.6" />
+        <circle cx="88%" cy="19%" r="0.7" fill="#22D3EE" opacity="0.8" />
+        <circle cx="95%" cy="61%" r="0.8" fill="#ffffff" opacity="0.7" />
+        <circle cx="9%" cy="93%" r="0.6" fill="#22D3EE" opacity="0.6" />
+        <circle cx="28%" cy="53%" r="0.7" fill="#ffffff" opacity="0.7" />
+        <circle cx="67%" cy="95%" r="0.8" fill="#22D3EE" opacity="0.7" />
+        <circle cx="91%" cy="42%" r="0.6" fill="#ffffff" opacity="0.8" />
+        <circle cx="16%" cy="7%" r="0.8" fill="#22D3EE" opacity="0.75" />
+        <circle cx="49%" cy="62%" r="0.5" fill="#ffffff" opacity="0.55" />
+        <circle cx="85%" cy="74%" r="0.75" fill="#22D3EE" opacity="0.7" />
       </svg>
     </div>
   );
