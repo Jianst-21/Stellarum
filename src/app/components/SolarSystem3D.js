@@ -840,6 +840,23 @@ export default function SolarSystem3D() {
     const orbitGroups = [];
     const clickableMeshes = [sunMesh];
 
+    // NASA Texture Loader — real planet surface textures from Solar System Scope
+    const textureLoader = new THREE.TextureLoader();
+    const NASA_TEXTURES = {
+      mercury: '/textures/planets/mercury.jpg',
+      venus:   '/textures/planets/venus.jpg',
+      earth:   '/textures/planets/earth.jpg',
+      mars:    '/textures/planets/mars.jpg',
+      jupiter: '/textures/planets/jupiter.jpg',
+      saturn:  '/textures/planets/saturn.jpg',
+      uranus:  '/textures/planets/uranus.jpg',
+      neptune: '/textures/planets/neptune.jpg',
+      moon:    '/textures/planets/moon.jpg',
+    };
+    const loadTex = (id) => NASA_TEXTURES[id]
+      ? textureLoader.load(NASA_TEXTURES[id])
+      : createProceduralPlanetTexture(id);
+
     PLANET_DEFS.forEach(([id, r, dist, color, speed]) => {
       const orbitGroup = new THREE.Group();
       scene.add(orbitGroup);
@@ -852,7 +869,7 @@ export default function SolarSystem3D() {
       orbitRingMeshesRef.current.push(ringMesh);
 
       const planetGeo = new THREE.SphereGeometry(r, 32, 32);
-      const pTex = createProceduralPlanetTexture(id);
+      const pTex = loadTex(id);
 
       // MeshPhongMaterial gives realistic sun-side bright / dark-side shading
       const planetMat = new THREE.MeshPhongMaterial({
@@ -878,7 +895,7 @@ export default function SolarSystem3D() {
         moonRingMesh.rotation.x = Math.PI / 2;
         moonOrbitGroup.add(moonRingMesh);
 
-        const moonTex = createProceduralPlanetTexture('moon');
+        const moonTex = loadTex('moon');
         const moonMesh = new THREE.Mesh(
           new THREE.SphereGeometry(0.45, 16, 16),
           new THREE.MeshStandardMaterial({ map: moonTex, roughness: 0.7 })
