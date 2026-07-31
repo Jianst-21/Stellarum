@@ -328,7 +328,10 @@ export default function PlanetScaleComparisonSection() {
 
       {/* TAB 1: 1-VS-1 COMPARE */}
       {activeTab === 'compare' && (
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
+        <div className="bg-[#05060f] border border-cyan-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(34,211,238,0.12)] relative overflow-hidden animate-fadeIn">
+          {/* Subtle grid pattern background like Solar System Card */}
+          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
@@ -339,7 +342,7 @@ export default function PlanetScaleComparisonSection() {
                 <select
                   value={leftId}
                   onChange={(e) => setLeftId(e.target.value)}
-                  className="w-full appearance-none bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all cursor-pointer shadow-lg"
+                  className="w-full appearance-none bg-[#03040a] border border-cyan-500/40 hover:border-cyan-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all cursor-pointer shadow-lg"
                 >
                   {CELESTIAL_BODIES.map((b) => (
                     <option key={b.id} value={b.id} className="bg-slate-900 text-white py-1">
@@ -360,7 +363,7 @@ export default function PlanetScaleComparisonSection() {
                 <select
                   value={rightId}
                   onChange={(e) => setRightId(e.target.value)}
-                  className="w-full appearance-none bg-slate-950/90 border border-purple-500/40 hover:border-purple-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer shadow-lg"
+                  className="w-full appearance-none bg-[#03040a] border border-purple-500/40 hover:border-purple-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer shadow-lg"
                 >
                   {CELESTIAL_BODIES.map((b) => (
                     <option key={b.id} value={b.id} className="bg-slate-900 text-white py-1">
@@ -373,13 +376,13 @@ export default function PlanetScaleComparisonSection() {
             </div>
           </div>
 
-          <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-6 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-around gap-8 min-h-[360px] relative overflow-hidden">
-            <div className="flex flex-col items-center justify-center flex-1 text-center group">
+          <div className="bg-[#03040a] border border-cyan-500/40 rounded-2xl p-6 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-around gap-8 min-h-[360px] relative overflow-hidden shadow-2xl">
+            <div className="flex flex-col items-center justify-center flex-1 text-center group z-10">
               <div className="h-60 flex items-center justify-center relative w-full">
                 <PlanetSphere3D id={leftObj.id} sizePx={leftPx} />
               </div>
               <div className="mt-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/20">
+                <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30">
                   {leftObj.category}
                 </span>
                 <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
@@ -392,10 +395,10 @@ export default function PlanetScaleComparisonSection() {
             </div>
 
             <div className="flex flex-col items-center justify-center z-10">
-              <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-gray-300 font-bold shadow-lg my-2">
+              <div className="w-12 h-12 rounded-full bg-[#05060f] border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold shadow-lg my-2">
                 <ArrowLeftRight className="w-5 h-5 text-cyan-400" />
               </div>
-              <div className="bg-slate-900/90 border border-cyan-500/30 rounded-xl px-4 py-2 text-center backdrop-blur-md shadow-xl max-w-[200px]">
+              <div className="bg-[#05060f] border border-cyan-500/40 rounded-xl px-4 py-2 text-center backdrop-blur-md shadow-xl max-w-[200px]">
                 <span className="text-xs text-gray-400 block">Rasio Ukuran</span>
                 <span className="text-lg font-extrabold text-cyan-300">{timesLarger}×</span>
                 <span className="text-[11px] text-gray-400 block mt-0.5">
@@ -404,12 +407,12 @@ export default function PlanetScaleComparisonSection() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center flex-1 text-center group">
+            <div className="flex flex-col items-center justify-center flex-1 text-center group z-10">
               <div className="h-60 flex items-center justify-center relative w-full">
                 <PlanetSphere3D id={rightObj.id} sizePx={rightPx} />
               </div>
               <div className="mt-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-purple-400 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/20">
+                <span className="text-xs font-semibold uppercase tracking-wider text-purple-400 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/30">
                   {rightObj.category}
                 </span>
                 <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
@@ -422,15 +425,15 @@ export default function PlanetScaleComparisonSection() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-slate-950/50 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+            <div className="bg-[#03040a] border border-cyan-500/30 rounded-2xl p-4 flex items-start gap-3">
               <Info className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-white">{leftObj.name}</h4>
                 <p className="text-xs text-gray-400 mt-1 leading-relaxed">{leftObj.description}</p>
               </div>
             </div>
-            <div className="bg-slate-950/50 border border-slate-800/80 rounded-2xl p-4 flex items-start gap-3">
+            <div className="bg-[#03040a] border border-purple-500/30 rounded-2xl p-4 flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-white">{rightObj.name}</h4>
@@ -443,8 +446,11 @@ export default function PlanetScaleComparisonSection() {
 
       {/* TAB 2: LINEUP & SORTING 3D */}
       {activeTab === 'lineup' && (
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800">
+        <div className="bg-[#05060f] border border-purple-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(168,85,247,0.12)] relative overflow-hidden animate-fadeIn">
+          {/* Subtle grid pattern background */}
+          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b border-purple-900/40 relative z-10">
             <div>
               <h3 className="text-xl font-bold text-white">Barisan Benda Kosmik 3D</h3>
               <p className="text-xs text-gray-400 mt-0.5">Menampilkan 4 objek per halaman. Gunakan tombol panah untuk menggeser.</p>
@@ -457,7 +463,7 @@ export default function PlanetScaleComparisonSection() {
                   <select
                     value={sortCriteria}
                     onChange={(e) => setSortCriteria(e.target.value)}
-                    className="appearance-none bg-slate-950/90 border border-purple-500/40 hover:border-purple-400 rounded-xl px-3.5 py-2 pr-9 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer shadow-md"
+                    className="appearance-none bg-[#03040a] border border-purple-500/40 hover:border-purple-400 rounded-xl px-3.5 py-2 pr-9 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer shadow-md"
                   >
                     <option value="diameterDesc">Ukuran Diameter (Terbesar ke Terkecil)</option>
                     <option value="distAsc">Jarak dari Matahari (Terdekat ke Terjauh)</option>
@@ -467,7 +473,7 @@ export default function PlanetScaleComparisonSection() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 shadow-md">
+              <div className="flex items-center gap-1.5 bg-[#03040a] p-1.5 rounded-xl border border-purple-500/30 shadow-md">
                 <button
                   onClick={prevLineupPage}
                   className="p-1.5 rounded-lg hover:bg-purple-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
@@ -489,14 +495,14 @@ export default function PlanetScaleComparisonSection() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-h-[320px] items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-h-[320px] items-stretch relative z-10">
             {currentVisibleBodies.map((b, idxInPage) => {
               const globalRank = lineupPageIndex * itemsPerPage + idxInPage + 1;
               const px = getLogScalePx(b.diameterKm, 70, 135);
               return (
                 <div
                   key={b.id}
-                  className="flex flex-col items-center justify-between bg-slate-950/80 border border-slate-800 hover:border-purple-500/50 rounded-2xl p-5 shadow-xl hover:shadow-purple-500/10 transition-all group relative"
+                  className="flex flex-col items-center justify-between bg-[#03040a] border border-purple-500/30 hover:border-purple-400 rounded-2xl p-5 shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all group relative"
                 >
                   <span className="text-[10px] font-black tracking-widest text-purple-400 bg-purple-950/60 px-3 py-0.5 rounded-full border border-purple-500/30 mb-2 shadow-md">
                     #{globalRank}
@@ -521,8 +527,11 @@ export default function PlanetScaleComparisonSection() {
 
       {/* TAB 3: MINI QUIZ SORTING */}
       {activeTab === 'quiz' && (
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
-          <div className="text-center max-w-xl mx-auto mb-8">
+        <div className="bg-[#05060f] border border-amber-500/30 rounded-3xl p-6 md:p-10 shadow-[0_0_50px_rgba(245,158,11,0.12)] relative overflow-hidden animate-fadeIn">
+          {/* Subtle grid pattern background */}
+          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+
+          <div className="text-center max-w-xl mx-auto mb-8 relative z-10">
             <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider">
               Mini-Game Tantangan Urutan
             </span>
@@ -535,11 +544,11 @@ export default function PlanetScaleComparisonSection() {
           </div>
 
           {/* Quiz Cards Lineup */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 relative z-10">
             {userOrder.map((item, idx) => (
               <div
                 key={item.id}
-                className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col items-center relative group hover:border-amber-500/40 transition-all"
+                className="bg-[#03040a] border border-amber-500/30 hover:border-amber-400 rounded-2xl p-4 flex flex-col items-center relative group hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all"
               >
                 <div className="absolute top-3 left-3 w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs flex items-center justify-center">
                   #{idx + 1}
@@ -550,7 +559,7 @@ export default function PlanetScaleComparisonSection() {
                   <button
                     onClick={() => moveQuizItem(idx, idx - 1)}
                     disabled={idx === 0}
-                    className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700 text-gray-300 disabled:opacity-30 hover:bg-amber-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
+                    className="w-7 h-7 rounded-lg bg-[#05060f] border border-amber-500/30 text-gray-300 disabled:opacity-30 hover:bg-amber-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
                     title="Geser Kiri"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -558,7 +567,7 @@ export default function PlanetScaleComparisonSection() {
                   <button
                     onClick={() => moveQuizItem(idx, idx + 1)}
                     disabled={idx === userOrder.length - 1}
-                    className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700 text-gray-300 disabled:opacity-30 hover:bg-amber-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
+                    className="w-7 h-7 rounded-lg bg-[#05060f] border border-amber-500/30 text-gray-300 disabled:opacity-30 hover:bg-amber-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
                     title="Geser Kanan"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -581,7 +590,7 @@ export default function PlanetScaleComparisonSection() {
             ))}
           </div>
 
-          <div className="flex flex-col items-center gap-4 border-t border-slate-800 pt-6">
+          <div className="flex flex-col items-center gap-4 border-t border-amber-900/40 pt-6 relative z-10">
             {!quizChecked ? (
               <button
                 onClick={checkQuizAnswer}
@@ -612,7 +621,7 @@ export default function PlanetScaleComparisonSection() {
 
                 <button
                   onClick={generateQuiz}
-                  className="px-6 py-2.5 rounded-xl bg-slate-950 border border-slate-700 hover:border-amber-500 text-white text-xs font-semibold flex items-center gap-2 transition-all"
+                  className="px-6 py-2.5 rounded-xl bg-[#03040a] border border-amber-500/40 hover:border-amber-400 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-lg"
                 >
                   <RefreshCw className="w-4 h-4 text-amber-400" />
                   <span>Mainkan Ronde Baru (Acak Planet)</span>
