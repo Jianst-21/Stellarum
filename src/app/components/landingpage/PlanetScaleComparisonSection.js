@@ -73,9 +73,10 @@ function PlanetSphere3D({ id, sizePx }) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.z = id === 'saturn' ? 3.6 : 2.8;
+    // Camera z position: 4.6 for Saturn to give its 3D rings generous margins on all sides without clipping
+    camera.position.z = id === 'saturn' ? 4.6 : 2.8;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
@@ -120,12 +121,24 @@ function PlanetSphere3D({ id, sizePx }) {
 
     let saturnRingMesh = null;
     if (id === 'saturn') {
-      const ringGeo = new THREE.RingGeometry(1.15, 1.75, 48);
+      const ringGeo = new THREE.RingGeometry(1.2, 1.85, 64);
+      // Radial UV Mapping Fix so saturnring.jpg renders concentric ring bands
+      const pos = ringGeo.attributes.position;
+      const uvs = ringGeo.attributes.uv;
+      for (let i = 0; i < pos.count; i++) {
+        const vx = pos.getX(i);
+        const vy = pos.getY(i);
+        const r = Math.sqrt(vx * vx + vy * vy);
+        const u = (r - 1.2) / (1.85 - 1.2);
+        uvs.setXY(i, u, 0.5);
+      }
+      uvs.needsUpdate = true;
+
       const ringMat = new THREE.MeshBasicMaterial({
         map: globalTextureLoader.load('/textures/planets/saturnring.jpg'),
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.90,
       });
       saturnRingMesh = new THREE.Mesh(ringGeo, ringMat);
       saturnRingMesh.rotation.x = Math.PI / 2.3;
@@ -440,15 +453,18 @@ export default function PlanetScaleComparisonSection() {
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400 font-medium">Urutkan:</span>
-                <select
-                  value={sortCriteria}
-                  onChange={(e) => setSortCriteria(e.target.value)}
-                  className="bg-slate-950 border border-purple-500/40 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none cursor-pointer"
-                >
-                  <option value="diameterDesc">Ukuran Diameter (Terbesar ke Terkecil)</option>
-                  <option value="distAsc">Jarak dari Matahari (Terdekat ke Terjauh)</option>
-                  <option value="tempDesc">Suhu Rata-Rata (Terpanas ke Terdingin)</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={sortCriteria}
+                    onChange={(e) => setSortCriteria(e.target.value)}
+                    className="appearance-none bg-slate-950/90 border border-purple-500/40 hover:border-purple-400 rounded-xl px-3.5 py-2 pr-9 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer shadow-md"
+                  >
+                    <option value="diameterDesc">Ukuran Diameter (Terbesar ke Terkecil)</option>
+                    <option value="distAsc">Jarak dari Matahari (Terdekat ke Terjauh)</option>
+                    <option value="tempDesc">Suhu Rata-Rata (Terpanas ke Terdingin)</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none" />
+                </div>
               </div>
 
               <div className="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 shadow-md">
