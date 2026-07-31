@@ -131,19 +131,19 @@ export default function SpaceExplorationTimelineSection() {
       </div>
 
       {/* Vertical Timeline */}
-      <div className="relative border-l-2 border-purple-500/30 ml-4 md:ml-32 space-y-10 pl-6 md:pl-10">
+      <div className="relative border-l-2 border-purple-500/30 ml-4 md:ml-36 space-y-10 pl-6 md:pl-10">
         {filteredEvents.map((evt, idx) => (
           <div
             key={idx}
             className="relative group transition-all duration-300"
           >
-            {/* Timeline Dot Icon */}
-            <div className="absolute -left-[31px] md:-left-[47px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-2 border-purple-400 flex items-center justify-center group-hover:scale-125 group-hover:bg-purple-500 transition-all shadow-md shadow-purple-500/50">
+            {/* Timeline Dot Icon — 100% Pixel-Perfect Centered on Vertical Line */}
+            <div className="absolute -left-[35px] md:-left-[51px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-2 border-purple-400 flex items-center justify-center group-hover:scale-125 group-hover:bg-purple-500 transition-all shadow-md shadow-purple-500/50 z-10">
               <span className="w-2 h-2 rounded-full bg-purple-300"></span>
             </div>
 
             {/* Year Badge on the left for desktop */}
-            <div className="md:absolute md:-left-36 md:top-1 text-cyan-400 font-extrabold text-lg md:text-xl tracking-wider mb-2 md:mb-0">
+            <div className="md:absolute md:-left-36 md:top-1 text-cyan-400 font-extrabold text-lg md:text-xl tracking-wider mb-2 md:mb-0 md:w-28 md:text-right">
               {evt.year}
             </div>
 
