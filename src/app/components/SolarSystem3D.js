@@ -808,10 +808,10 @@ export default function SolarSystem3D() {
     selectionAuraMesh.visible = false;
     scene.add(selectionAuraMesh);
 
-    // Seamless Sun
-    const sunTex = createSeamlessSunTexture();
+    // Sun — use real NASA texture photo
+    const tLoader = new THREE.TextureLoader();
     const sunGeo = new THREE.SphereGeometry(10, 48, 48);
-    const sunMat = new THREE.MeshBasicMaterial({ map: sunTex });
+    const sunMat = new THREE.MeshBasicMaterial({ map: tLoader.load('/textures/planets/sun.jpg') });
     const sunMesh = new THREE.Mesh(sunGeo, sunMat);
     sunMesh.userData = { id: 'sun', clickable: true, radiusSize: 10 };
     scene.add(sunMesh);
@@ -852,6 +852,9 @@ export default function SolarSystem3D() {
       uranus:  '/textures/planets/uranus.jpg',
       neptune: '/textures/planets/neptune.jpg',
       moon:    '/textures/planets/moon.jpg',
+      pluto:   '/textures/planets/pluto.jpg',
+      ceres:   '/textures/planets/pluto.jpg',
+      eris:    '/textures/planets/pluto.jpg',
     };
     const loadTex = (id) => NASA_TEXTURES[id]
       ? textureLoader.load(NASA_TEXTURES[id])
@@ -931,6 +934,20 @@ export default function SolarSystem3D() {
 
         orbitGroup.userData.moonGroup = moonOrbitGroup;
         orbitGroup.userData.jwstGroup = jwstOrbitGroup;
+
+        // Earth cloud layer — semi-transparent sphere above surface
+        const cloudGeo = new THREE.SphereGeometry(1.7 + 0.07, 32, 32);
+        const cloudMat = new THREE.MeshPhongMaterial({
+          map: textureLoader.load('/textures/planets/earthclouds.jpg'),
+          transparent: true,
+          opacity: 0.38,
+          depthWrite: false,
+        });
+        const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+        planetMesh.add(cloudMesh);
+        // Slow cloud self-rotation stored separately
+        cloudMesh.userData = { isClouds: true };
+        orbitGroups.push({ group: new THREE.Group(), speed: 0, mesh: cloudMesh, selfSpin: 0.08 });
       }
 
       if (id === 'mars') {
@@ -1101,7 +1118,7 @@ export default function SolarSystem3D() {
     plutoRingMesh.rotation.x = Math.PI / 2;
     scene.add(plutoRingMesh);
 
-    const plutoTex = createProceduralPlanetTexture('pluto');
+    const plutoTex = loadTex('pluto');
     const plutoMesh = new THREE.Mesh(
       new THREE.SphereGeometry(0.7, 16, 16),
       new THREE.MeshStandardMaterial({ map: plutoTex, roughness: 0.6 })
@@ -1155,7 +1172,7 @@ export default function SolarSystem3D() {
     ceresRingMesh.rotation.x = Math.PI / 2;
     scene.add(ceresRingMesh);
 
-    const ceresTex = createProceduralPlanetTexture('ceres');
+    const ceresTex = loadTex('ceres');
     const ceresMesh = new THREE.Mesh(
       new THREE.SphereGeometry(0.45, 24, 24),
       new THREE.MeshStandardMaterial({ map: ceresTex, roughness: 0.7 })
@@ -1213,7 +1230,7 @@ export default function SolarSystem3D() {
     erisRingMesh.rotation.x = Math.PI / 2;
     erisOrbitGroup.add(erisRingMesh);
 
-    const erisTex = createProceduralPlanetTexture('eris');
+    const erisTex = loadTex('eris');
     const erisMesh = new THREE.Mesh(
       new THREE.SphereGeometry(0.52, 24, 24),
       new THREE.MeshStandardMaterial({ map: erisTex, roughness: 0.4 })
