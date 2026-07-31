@@ -605,12 +605,12 @@ export default function SolarSystem3D() {
     const width = container.clientWidth || 800;
     const height = container.clientHeight || 700;
 
-    // Scene, Camera, Renderer
+    // Scene, Camera, Renderer (Optimized for 60 FPS performance)
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 5000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     container.appendChild(renderer.domElement);
 
     // Controls
@@ -713,9 +713,9 @@ export default function SolarSystem3D() {
     fillLight.position.set(50, 120, 80);
     scene.add(fillLight);
 
-    // Starfield
+    // Starfield (Optimized count)
     const starGeo = new THREE.BufferGeometry();
-    const starCount = 3500;
+    const starCount = 2000;
     const positions = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
       const r = 800 + Math.random() * 1200;
@@ -812,7 +812,7 @@ export default function SolarSystem3D() {
 
         const moonTex = createProceduralPlanetTexture('moon');
         const moonMesh = new THREE.Mesh(
-          new THREE.SphereGeometry(0.45, 24, 24),
+          new THREE.SphereGeometry(0.45, 16, 16),
           new THREE.MeshStandardMaterial({ map: moonTex, roughness: 0.7 })
         );
         moonMesh.position.set(moonDist, 0, 0);
@@ -821,7 +821,7 @@ export default function SolarSystem3D() {
         clickableMeshes.push(moonMesh);
 
         // Click target sphere for Moon
-        const moonClickGeo = new THREE.SphereGeometry(1.0, 12, 12);
+        const moonClickGeo = new THREE.SphereGeometry(1.0, 8, 8);
         const moonClickMat = new THREE.MeshBasicMaterial({ visible: false });
         const moonClickMesh = new THREE.Mesh(moonClickGeo, moonClickMat);
         moonClickMesh.userData = { id: 'moon', clickable: true };
@@ -1027,11 +1027,11 @@ export default function SolarSystem3D() {
     clickableMeshes.push(plutoMesh);
     orbitGroups.push({ group: plutoOrbit, speed: 0.13, mesh: plutoMesh, selfSpin: 0.2 });
 
-    // Asteroid Belt InstancedMesh (between Mars at 50 and Jupiter at 85)
+    // Asteroid Belt InstancedMesh (Optimized Tetrahedron Geometry & Count)
     const asteroidGroup = new THREE.Group();
     scene.add(asteroidGroup);
-    const asteroidCount = 550;
-    const asteroidGeo = new THREE.DodecahedronGeometry(0.28, 0);
+    const asteroidCount = 300;
+    const asteroidGeo = new THREE.TetrahedronGeometry(0.26, 0);
     const asteroidMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.6, emissive: 0x888888, emissiveIntensity: 0.2 });
     const asteroidInstMesh = new THREE.InstancedMesh(asteroidGeo, asteroidMat, asteroidCount);
     const dummy = new THREE.Object3D();
@@ -1089,8 +1089,8 @@ export default function SolarSystem3D() {
     // --- PHASE 2: KUIPER BELT & ERIS ---
     const kuiperGroup = new THREE.Group();
     scene.add(kuiperGroup);
-    const kuiperParticleCount = 450;
-    const kuiperGeo = new THREE.DodecahedronGeometry(0.3, 0);
+    const kuiperParticleCount = 250;
+    const kuiperGeo = new THREE.TetrahedronGeometry(0.28, 0);
     const kuiperMat = new THREE.MeshStandardMaterial({ color: 0x80deea, roughness: 0.4, emissive: 0x00bcd4, emissiveIntensity: 0.15 });
     const kuiperInstMesh = new THREE.InstancedMesh(kuiperGeo, kuiperMat, kuiperParticleCount);
     const kuiperDummy = new THREE.Object3D();
@@ -1534,9 +1534,9 @@ export default function SolarSystem3D() {
         </p>
       </div>
 
-      {/* Info Panel HUD Modal */}
+      {/* Info Panel HUD Modal (Optimized CSS without laggy backdrop-blur) */}
       {activeData && (
-        <div className="absolute top-1/2 right-6 md:right-10 -translate-y-1/2 w-[340px] max-w-[calc(100vw-32px)] bg-[#0f1226]/95 backdrop-blur-md border border-[#22D3EE]/50 rounded-2xl p-6 text-[#eef0fb] z-20 shadow-[0_10px_40px_rgba(0,0,0,0.8)] transition-all duration-300">
+        <div className="absolute top-1/2 right-6 md:right-10 -translate-y-1/2 w-[340px] max-w-[calc(100vw-32px)] bg-[#0f1226]/95 border border-[#22D3EE]/50 rounded-2xl p-6 text-[#eef0fb] z-20 shadow-[0_10px_40px_rgba(0,0,0,0.9)] transition-all duration-300">
           <button
             onClick={handleClosePanel}
             className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 border-none text-[#22D3EE] flex items-center justify-center transition-colors cursor-pointer"
