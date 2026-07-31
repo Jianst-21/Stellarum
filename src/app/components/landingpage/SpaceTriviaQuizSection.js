@@ -1,47 +1,47 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, BrainCircuit, RefreshCw, CheckCircle2, XCircle, ArrowRight, BookOpen } from 'lucide-react';
+import { Sparkles, BrainCircuit, RefreshCw, CheckCircle2, XCircle, ArrowRight, BookOpen, Lightbulb } from 'lucide-react';
 
 const SPACE_FACTS = [
   {
-    title: "💎 Hujan Intan di Neptunus & Uranus",
+    title: "Hujan Intan di Neptunus & Uranus",
     category: "RAKSASA ES",
     desc: "Di planet Neptunus dan Uranus, tekanan atmosfer yang luar biasa tinggi mengubah gas metana menjadi kristal intan murni yang menghujani lautan mantel es planet tersebut.",
     highlight: "Tekanan atmosfer ekstrem mengkristalkan karbon menjadi intan murni."
   },
   {
-    title: "⏳ Satu Hari Venus Lebih Panjang Dari Tahunnya",
+    title: "Satu Hari Venus Lebih Panjang Dari Tahunnya",
     category: "ROTASI UNIK",
     desc: "Venus membutuhkan waktu 243 hari Bumi untuk sekali berotasi pada porosnya, namun hanya 225 hari Bumi untuk sekali mengelilingi Matahari. Ini berarti 1 hari di Venus lebih lama dari 1 tahunnya!",
     highlight: "Rotasi terlembab di Tata Surya: 243 hari Bumi."
   },
   {
-    title: "🌋 Olympus Mons: Gunung Raksasa Mars",
+    title: "Olympus Mons: Gunung Raksasa Mars",
     category: "GEOFISIKA",
     desc: "Gunung Olympus Mons di Mars adalah gunung tertinggi di seluruh Tata Surya. Tingginya mencapai 21,9 km—lebih dari 2.5 kali lipat tinggi Gunung Everest di Bumi!",
     highlight: "Tinggi 21,9 km dengan puncaknya menembus atmosfer tipis Mars."
   },
   {
-    title: "🌊 Samudra Cair Tersembunyi di Europa",
+    title: "Samudra Cair Tersembunyi di Europa",
     category: "SATELIT ES",
     desc: "Satelit Europa milik Jupiter memiliki samudra cair raksasa di bawah kerak es tebalnya, dengan volume air diperkirakan mencapai 2 kali lipat seluruh air di Bumi.",
     highlight: "Target utama pencarian potensi kehidupan mikroba luar Bumi."
   },
   {
-    title: "🌧️ Titan Memiliki Hujan & Sungai Metana",
+    title: "Titan Memiliki Hujan & Sungai Metana",
     category: "ATMOSFER UNIK",
     desc: "Bulan Titan milik Saturnus memiliki atmosfer tebal dan danau cair. Uniknya, bukannya air hujan biasa, yang hujan dan mengalir di sungai-sungai Titan adalah metana dan etana cair!",
     highlight: "Satu-satunya bulan dengan siklus cuaca cairan hidrokarbon."
   },
   {
-    title: "👣 Jejak Kaki di Bulan Bertahan 100 Juta Tahun",
+    title: "Jejak Kaki di Bulan Bertahan 100 Juta Tahun",
     category: "EKSPLORASI",
     desc: "Jejak kaki astronot Apollo di Bulan tidak akan terhapus karena Bulan tidak memiliki atmosfer, angin, atau erosi air. Jejak tersebut diprediksi bertahan hingga jutaan tahun.",
     highlight: "Abadi tanpa erosi angin atau air laut."
   },
   {
-    title: "🧲 Ganymede Punya Medan Magnet Sendiri",
+    title: "Ganymede Punya Medan Magnet Sendiri",
     category: "MAGNETOSFER",
     desc: "Ganymede—bulan terbesar di Tata Surya—adalah satu-satunya satelit alami yang diketahui memiliki medan magnetnya sendiri dari gerak inti besi cair di dalamnya.",
     highlight: "Satu-satunya bulan yang dilindungi aura medan magnetik."
@@ -186,8 +186,9 @@ export default function SpaceTriviaQuizSection() {
                 {currentFact.desc}
               </p>
 
-              <div className="bg-[#22D3EE]/10 border border-[#22D3EE]/30 rounded-xl p-4 mb-6 text-xs md:text-sm text-[#22D3EE] font-['Hanken_Grotesk'] font-medium">
-                💡 <strong>Intisari:</strong> {currentFact.highlight}
+              <div className="bg-[#22D3EE]/10 border border-[#22D3EE]/30 rounded-xl p-4 mb-6 text-xs md:text-sm text-[#22D3EE] font-['Hanken_Grotesk'] font-medium flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-[#22D3EE] shrink-0" />
+                <span><strong>Intisari:</strong> {currentFact.highlight}</span>
               </div>
 
               <div className="flex justify-end">
