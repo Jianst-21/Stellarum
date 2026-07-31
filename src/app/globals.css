@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Hanken+Grotesk:wght@400..700&family=Inter:wght@400..600&family=Montserrat:wght@400..800&family=Sora:wght@400..700&display=swap');
+@import "tailwindcss";
+
+html,
+body {
+  background-color: #000000;
+  color: #ffffff;
+  overflow-x: hidden !important;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom Sleek Dark Space Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #22d3ee;
+}
+
+/* Global Reset to prevent image and element overflow */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Orbit Path */
+.orbit-path {
+  border: 1px dashed rgba(34, 211, 238, 0.3);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.planet-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 0.85; transform: scale(1.2); }
+}
+
+.animate-star-sparkle {
+  animation: sparkle 4s ease-in-out infinite;
+}
+
+/* Base Stars Element */
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: -3;
+}
+
+/* Ultra-Subtle Shooting Star Animation */
+.shooting-star {
+  position: absolute;
+  width: 2.5px;
+  height: 2.5px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  z-index: -1;
+  opacity: 0;
+}
+
+.shooting-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.3), transparent);
+}
+
+@keyframes shoot-rare-single {
+  0% {
+    transform: rotate(315deg) translateX(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.85;
+  }
+  30% {
+    opacity: 0.85;
+  }
+  45% {
+    transform: rotate(315deg) translateX(-900px);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(315deg) translateX(-900px);
+    opacity: 0;
+  }
+}
+
+.starfall-rare-single {
+  top: 15%;
+  right: 18%;
+  left: initial;
+  animation: shoot-rare-single 15s linear infinite;
+  animation-delay: 3s;
+}
