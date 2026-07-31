@@ -662,10 +662,34 @@ export default function SolarSystem3D() {
 
     const domElem = renderer.domElement;
 
-    // Mouse events
-    domElem.addEventListener('mousedown', (e) => dragStart(e.clientX, e.clientY));
-    domElem.addEventListener('mousemove', (e) => dragMove(e.clientX, e.clientY));
-    window.addEventListener('mouseup', dragEnd);
+    // Mouse events with dynamic hover cursor detection
+    domElem.addEventListener('mousedown', (e) => {
+      dragStart(e.clientX, e.clientY);
+      domElem.style.cursor = 'grabbing';
+    });
+
+    domElem.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        dragMove(e.clientX, e.clientY);
+        domElem.style.cursor = 'grabbing';
+      } else {
+        const rect = domElem.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(clickableMeshes, true);
+        if (intersects.length > 0 && intersects[0].object.userData.id) {
+          domElem.style.cursor = 'pointer';
+        } else {
+          domElem.style.cursor = 'grab';
+        }
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      dragEnd();
+      domElem.style.cursor = 'grab';
+    });
 
     // Touch events for mobile
     let lastTouchDist = null;
@@ -1539,7 +1563,7 @@ export default function SolarSystem3D() {
       )}
 
       {/* 3D Canvas mount */}
-      <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      <div ref={mountRef} className="w-full h-full" />
 
       {/* HUD Top Header & Mobile Touch Toggle */}
       <div className="absolute top-0 left-0 w-full p-4 sm:p-6 pointer-events-none z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
