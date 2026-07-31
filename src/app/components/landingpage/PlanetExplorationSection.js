@@ -26,7 +26,7 @@ export default function PlanetExplorationSection() {
   ];
 
   return (
-    <section className="py-24 px-6 max-w-[1280px] mx-auto" id="eksplorasi">
+    <section className="py-24 px-4 md:px-10 max-w-[1280px] mx-auto" id="eksplorasi">
       <div className="flex justify-between items-end mb-16">
         <div className="text-left">
           <h2 className="font-['Sora'] text-3xl font-bold text-[#22D3EE]">Eksplorasi Planet</h2>
@@ -44,18 +44,18 @@ export default function PlanetExplorationSection() {
         {planetCards.map((planet, idx) => (
           <div
             key={idx}
-            className="bg-[#0F0F14] rounded-xl overflow-hidden group cursor-pointer border border-[#22D3EE]/30"
+            className="bg-[#0D0E1A] rounded-2xl overflow-hidden group cursor-pointer border border-[#22D3EE]/20 hover:border-[#22D3EE]/60 transition-all duration-300 hover:shadow-[0_0_24px_rgba(34,211,238,0.15)] flex flex-col"
           >
-            <div className="h-48 w-full relative overflow-hidden" style={{ height: '192px', width: '100%', overflow: 'hidden' }}>
+            <div className="h-48 w-full relative overflow-hidden shrink-0">
               <div
                 className="bg-cover bg-center w-full h-full group-hover:scale-110 transition-transform duration-700"
-                style={{ backgroundImage: `url('${planet.img}')`, width: '100%', height: '100%', backgroundSize: 'cover', backgroundPosition: 'center' }}
+                style={{ backgroundImage: `url('${planet.img}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F14] to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0D0E1A] via-[#0D0E1A]/20 to-transparent" />
             </div>
-            <div className="p-4">
-              <h3 className="font-['Sora'] text-xl text-[#FFFFFF] mb-2 font-bold">{planet.name}</h3>
-              <p className="text-[#ffffff] text-sm line-clamp-2">{planet.desc}</p>
+            <div className="p-5 flex flex-col gap-2">
+              <h3 className="font-['Sora'] text-lg text-white font-bold">{planet.name}</h3>
+              <p className="text-[#9aa3c4] text-sm leading-relaxed line-clamp-2">{planet.desc}</p>
             </div>
           </div>
         ))}

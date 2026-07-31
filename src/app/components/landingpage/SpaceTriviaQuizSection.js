@@ -165,10 +165,12 @@ export default function SpaceTriviaQuizSection() {
           </div>
         </div>
 
-        {/* TAB 1: FAKTA KOSMIK ACAK */}
-        {activeTab === 'fact' && (
-          <div className="relative z-10 transition-all duration-300">
-            <div className="bg-black/40 border border-white/10 rounded-2xl p-6 md:p-8 relative">
+        {/* Tab content — fixed height container to prevent layout shift */}
+        <div className="relative z-10 min-h-[360px]">
+
+          {/* TAB 1: FAKTA KOSMIK ACAK */}
+          <div className={`transition-all duration-300 ${activeTab === 'fact' ? 'opacity-100 visible' : 'opacity-0 invisible absolute inset-0 pointer-events-none'}`}>
+            <div className="bg-black/40 border border-white/10 rounded-2xl p-6 md:p-8">
               <div className="flex items-center justify-between gap-2 mb-4">
                 <span className="text-xs font-semibold text-[#22D3EE] uppercase tracking-wider font-['Geist'] flex items-center gap-1.5">
                   <BookOpen className="w-4 h-4" /> {currentFact.category}
@@ -202,11 +204,9 @@ export default function SpaceTriviaQuizSection() {
               </div>
             </div>
           </div>
-        )}
 
-        {/* TAB 2: KUIS ASTRONOMI KILAT */}
-        {activeTab === 'quiz' && (
-          <div className="relative z-10 transition-all duration-300">
+          {/* TAB 2: KUIS ASTRONOMI KILAT */}
+          <div className={`transition-all duration-300 ${activeTab === 'quiz' ? 'opacity-100 visible' : 'opacity-0 invisible absolute inset-0 pointer-events-none'}`}>
             <div className="bg-black/40 border border-white/10 rounded-2xl p-6 md:p-8">
               <div className="flex items-center justify-between gap-2 mb-4">
                 <span className="text-xs font-semibold text-[#22D3EE] uppercase tracking-wider font-['Geist']">
@@ -255,29 +255,26 @@ export default function SpaceTriviaQuizSection() {
                 })}
               </div>
 
-              {/* Explanation & Next button when answered */}
-              {isAnswered && (
-                <div className="bg-white/5 border border-white/15 rounded-xl p-4 mb-6 animate-fadeIn">
-                  <p className="text-xs md:text-sm text-[#c8cee6] font-['Hanken_Grotesk']">
-                    <strong>Penjelasan:</strong> {currentQuiz.explanation}
-                  </p>
-                </div>
-              )}
+              {/* Explanation — always reserve space to avoid layout shift */}
+              <div className={`bg-white/5 border border-white/15 rounded-xl p-4 mb-6 transition-all duration-300 ${isAnswered ? 'opacity-100 visible' : 'opacity-0 invisible h-0 p-0 mb-0 border-0'}`}>
+                <p className="text-xs md:text-sm text-[#c8cee6] font-['Hanken_Grotesk']">
+                  <strong>Penjelasan:</strong> {currentQuiz.explanation}
+                </p>
+              </div>
 
-              {isAnswered && (
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleNextQuizQuestion}
-                    className="bg-[#22D3EE] text-[#001f25] px-6 py-2.5 rounded-xl text-xs font-bold font-['Geist'] hover:bg-[#22D3EE]/90 transition-colors cursor-pointer flex items-center gap-2 shadow-md"
-                  >
-                    <span>Pertanyaan Berikutnya</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+              <div className={`flex justify-end transition-all duration-300 ${isAnswered ? 'opacity-100 visible' : 'opacity-0 invisible h-0 overflow-hidden'}`}>
+                <button
+                  onClick={handleNextQuizQuestion}
+                  className="bg-[#22D3EE] text-[#001f25] px-6 py-2.5 rounded-xl text-xs font-bold font-['Geist'] hover:bg-[#22D3EE]/90 transition-colors cursor-pointer flex items-center gap-2 shadow-md"
+                >
+                  <span>Pertanyaan Berikutnya</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
-        )}
+
+        </div>
 
       </div>
     </section>
