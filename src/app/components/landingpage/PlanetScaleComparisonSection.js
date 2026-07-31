@@ -119,6 +119,28 @@ function PlanetSphere3D({ id, sizePx }) {
       material.needsUpdate = true;
     });
 
+    // Background 3D starfield particles inside sphere scene (matching Tata Surya 3D atmosphere)
+    const bgStarGeo = new THREE.BufferGeometry();
+    const bgStarCount = 45;
+    const bgStarPos = new Float32Array(bgStarCount * 3);
+    for (let i = 0; i < bgStarCount; i++) {
+      const r = 5 + Math.random() * 12;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos((Math.random() * 2) - 1);
+      bgStarPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      bgStarPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      bgStarPos[i * 3 + 2] = r * Math.cos(phi);
+    }
+    bgStarGeo.setAttribute('position', new THREE.BufferAttribute(bgStarPos, 3));
+    const bgStarMat = new THREE.PointsMaterial({
+      color: 0x22d3ee,
+      size: 1.1,
+      transparent: true,
+      opacity: 0.75,
+    });
+    const bgStarsMesh = new THREE.Points(bgStarGeo, bgStarMat);
+    scene.add(bgStarsMesh);
+
     let saturnRingMesh = null;
     if (id === 'saturn') {
       const ringGeo = new THREE.RingGeometry(1.2, 1.85, 64);
@@ -150,6 +172,7 @@ function PlanetSphere3D({ id, sizePx }) {
       animId = requestAnimationFrame(animate);
       mesh.rotation.y += 0.008;
       if (saturnRingMesh) saturnRingMesh.rotation.z += 0.003;
+      if (bgStarsMesh) bgStarsMesh.rotation.y += 0.001;
       renderer.render(scene, camera);
     };
     animate();
@@ -163,6 +186,8 @@ function PlanetSphere3D({ id, sizePx }) {
       renderer.dispose();
       geo.dispose();
       material.dispose();
+      bgStarGeo.dispose();
+      bgStarMat.dispose();
       scene.clear();
     };
   }, [id, sizePx]);
