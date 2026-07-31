@@ -1404,6 +1404,7 @@ export default function SolarSystem3D() {
     cometMesh.add(new THREE.Mesh(outerEnvGeo, outerEnvMat));
 
     // Ion tail (blue-white, long, straight)
+    const softCircleTex = createSoftCircleTexture();
     const tailParticleCount = 350;
     const tailGeo = new THREE.BufferGeometry();
     const tailPos = new Float32Array(tailParticleCount * 3);
