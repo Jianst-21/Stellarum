@@ -859,9 +859,9 @@ export default function SolarSystem3D() {
     selectionAuraMesh.visible = false;
     scene.add(selectionAuraMesh);
 
-    // Sun — procedural glowing texture (more visually striking than photo)
+    // Sun — using real NASA texture photo
     const tLoader = new THREE.TextureLoader();
-    const sunTex = createSeamlessSunTexture();
+    const sunTex = tLoader.load('/textures/planets/sun.jpg');
     const sunGeo = new THREE.SphereGeometry(10, 48, 48);
     const sunMat = new THREE.MeshBasicMaterial({ map: sunTex });
     const sunMesh = new THREE.Mesh(sunGeo, sunMat);
