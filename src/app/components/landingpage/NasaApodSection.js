@@ -7,16 +7,19 @@ const FALLBACK_APOD = {
   title: 'Pilar-Pilar Penciptaan (Peta Inframerah JWST)',
   date: '2024-03-15',
   explanation: 'Struktur debu dan gas antar-bintang raksasa di Nebula Elang (M16), berjarak 6.500 tahun cahaya dari Bumi. Gambar menakjubkan ini ditangkap oleh Teleskop Antariksa James Webb (JWST) menggunakan instrumen inframerah dekat (NIRCam), menampilkan ribuan bintang muda yang baru lahir dalam awan debu.',
-  url: 'https://images-assets.nasa.gov/image/PIA25658/PIA25658~orig.jpg',
-  hdurl: 'https://images-assets.nasa.gov/image/PIA25658/PIA25658~orig.jpg',
+  url: 'https://apod.nasa.gov/apod/image/2210/PillarsJWST_nircam_960.jpg',
+  hdurl: 'https://apod.nasa.gov/apod/image/2210/PillarsJWST_nircam_960.jpg',
   copyright: 'NASA, ESA, CSA, STScI',
   media_type: 'image'
 };
+
+const SECONDARY_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Pillars_of_creation_2014_Eagle_Neubla_Hubble_Space_Telescope.jpg/1280px-Pillars_of_creation_2014_Eagle_Neubla_Hubble_Space_Telescope.jpg';
 
 export default function NasaApodSection() {
   const [apod, setApod] = useState(FALLBACK_APOD);
   const [loading, setLoading] = useState(true);
   const [showHdModal, setShowHdModal] = useState(false);
+  const [currentImgUrl, setCurrentImgUrl] = useState(FALLBACK_APOD.url);
 
   const fetchApod = async () => {
     setLoading(true);
@@ -26,10 +29,12 @@ export default function NasaApodSection() {
       const data = await res.json();
       if (data && data.url) {
         setApod(data);
+        setCurrentImgUrl(data.url);
       }
     } catch (err) {
       console.warn('Using NASA APOD Fallback data:', err.message);
       setApod(FALLBACK_APOD);
+      setCurrentImgUrl(FALLBACK_APOD.url);
     } finally {
       setLoading(false);
     }
@@ -80,8 +85,9 @@ export default function NasaApodSection() {
                 <div className="relative overflow-hidden aspect-[4/3] md:aspect-[16/10]">
                   {/* Image */}
                   <img
-                    src={apod.url}
+                    src={currentImgUrl}
                     alt={apod.title}
+                    onError={() => setCurrentImgUrl(SECONDARY_FALLBACK)}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
