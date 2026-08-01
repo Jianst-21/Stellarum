@@ -101,11 +101,11 @@ export default function SpaceExplorationTimelineSection() {
     <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
       {/* Header */}
       <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/30 text-purple-400 text-sm font-medium mb-4 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
           <Compass className="w-4 h-4" />
           <span>Jejak Sejarah Manusia</span>
         </div>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-100 to-purple-400 mb-4">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
           Timeline Sejarah Eksplorasi Antariksa
         </h2>
         <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
@@ -121,7 +121,7 @@ export default function SpaceExplorationTimelineSection() {
             onClick={() => setActiveCategory(cat)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               activeCategory === cat
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 border border-purple-400/50'
+                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30 border border-cyan-400/50'
                 : 'bg-slate-900/80 border border-slate-800 text-gray-400 hover:text-white hover:border-slate-700'
             }`}
           >
@@ -131,15 +131,15 @@ export default function SpaceExplorationTimelineSection() {
       </div>
 
       {/* Vertical Timeline */}
-      <div className="relative border-l-2 border-purple-500/30 ml-4 md:ml-36 space-y-10 pl-6 md:pl-10">
+      <div className="relative border-l-2 border-cyan-500/30 ml-4 md:ml-36 space-y-10 pl-6 md:pl-10">
         {filteredEvents.map((evt, idx) => (
           <div
             key={idx}
             className="relative group transition-all duration-300"
           >
             {/* Timeline Dot Icon — 100% Pixel-Perfect Centered on Vertical Line */}
-            <div className="absolute -left-[35px] md:-left-[51px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-2 border-purple-400 flex items-center justify-center group-hover:scale-125 group-hover:bg-purple-500 transition-all shadow-md shadow-purple-500/50 z-10">
-              <span className="w-2 h-2 rounded-full bg-purple-300"></span>
+            <div className="absolute -left-[35px] md:-left-[51px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-2 border-cyan-400 flex items-center justify-center group-hover:scale-125 group-hover:bg-cyan-500 transition-all shadow-md shadow-cyan-500/50 z-10">
+              <span className="w-2 h-2 rounded-full bg-cyan-300"></span>
             </div>
 
             {/* Year Badge on the left for desktop (Clean 16px gap to the left of vertical line) */}
@@ -148,7 +148,7 @@ export default function SpaceExplorationTimelineSection() {
             </div>
 
             {/* Card Content */}
-            <div className="bg-slate-950/90 md:bg-slate-900/70 border border-slate-800/80 hover:border-purple-500/50 rounded-2xl p-6 backdrop-blur-none md:backdrop-blur-xl transition-all shadow-xl hover:shadow-purple-500/10">
+            <div className="bg-slate-950/90 md:bg-slate-900/70 border border-slate-800/80 hover:border-cyan-500/50 rounded-2xl p-6 backdrop-blur-none md:backdrop-blur-xl transition-all shadow-xl hover:shadow-cyan-500/10">
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${evt.badgeColor}`}>
                   {evt.category}
@@ -159,7 +159,7 @@ export default function SpaceExplorationTimelineSection() {
                 </span>
               </div>
 
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">
                 {evt.title}
               </h3>
               <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4">
@@ -169,7 +169,7 @@ export default function SpaceExplorationTimelineSection() {
               {/* Collapsible Details */}
               <button
                 onClick={() => setSelectedEvent(selectedEvent === idx ? null : idx)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
               >
                 <span>{selectedEvent === idx ? 'Tutup Detail' : 'Baca Detail Lengkap'}</span>
                 <ChevronRight className={`w-4 h-4 transition-transform ${selectedEvent === idx ? 'rotate-90' : ''}`} />

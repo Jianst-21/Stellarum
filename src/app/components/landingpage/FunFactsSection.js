@@ -13,15 +13,15 @@ export default function FunFactsSection() {
       icon: Sparkles,
       title: 'Milyaran Bintang',
       desc: 'Diperkirakan ada sekitar 100 hingga 400 milyar bintang hanya di galaksi Bima Sakti kita sendiri.',
-      accent: 'border-amber-500/30 hover:border-amber-400',
-      iconBg: 'bg-amber-500 text-slate-950',
+      accent: 'border-cyan-500/30 hover:border-cyan-400',
+      iconBg: 'bg-cyan-500 text-slate-950',
     },
     {
       icon: Zap,
       title: 'Kecepatan Cahaya',
       desc: 'Cahaya bergerak sangat cepat melintasi ruang hampa, mencapai kecepatan sekitar 299.792 kilometer per detik.',
-      accent: 'border-purple-500/30 hover:border-purple-400',
-      iconBg: 'bg-purple-500 text-slate-950',
+      accent: 'border-cyan-500/30 hover:border-cyan-400',
+      iconBg: 'bg-cyan-500 text-slate-950',
     },
   ];
 
@@ -29,11 +29,11 @@ export default function FunFactsSection() {
     <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto" id="fakta">
       {/* Standardized Section Header */}
       <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-950/60 border border-amber-500/30 text-amber-400 text-sm font-medium mb-4 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
           <Lightbulb className="w-4 h-4" />
           <span>Wawasan Kosmik Singkat</span>
         </div>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-amber-100 to-amber-400 mb-4">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
           Fakta Menarik Alam Semesta
         </h2>
         <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">

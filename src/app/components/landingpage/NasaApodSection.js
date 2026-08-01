@@ -43,11 +43,11 @@ export default function NasaApodSection() {
     <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
       {/* Header */}
       <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-sm font-medium mb-4 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
           <Camera className="w-4 h-4" />
           <span>Live Feed NASA Direct</span>
         </div>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-emerald-100 to-emerald-400 mb-4">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
           Astronomy Picture of the Day (APOD)
         </h2>
         <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
@@ -58,11 +58,11 @@ export default function NasaApodSection() {
       {/* Main APOD Display Card */}
       <div className="bg-slate-900/70 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
         {/* Glow Accent */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center min-h-[350px] gap-4">
-            <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin" />
+            <RefreshCw className="w-10 h-10 text-cyan-400 animate-spin" />
             <p className="text-gray-400 text-sm">Menghubungkan ke API NASA...</p>
           </div>
         ) : (
@@ -89,7 +89,7 @@ export default function NasaApodSection() {
                   {/* Fullscreen HD Button Overlay */}
                   <button
                     onClick={() => setShowHdModal(true)}
-                    className="absolute bottom-4 right-4 bg-slate-900/90 hover:bg-emerald-600 border border-slate-700 hover:border-emerald-400 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 backdrop-blur-md transition-all shadow-xl"
+                    className="absolute bottom-4 right-4 bg-slate-900/90 hover:bg-cyan-600 border border-slate-700 hover:border-cyan-400 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 backdrop-blur-md transition-all shadow-xl"
                   >
                     <Maximize2 className="w-4 h-4" />
                     <span>Lihat Ukuran Penuh (HD)</span>
@@ -102,7 +102,7 @@ export default function NasaApodSection() {
             <div className="lg:col-span-5 flex flex-col justify-between">
               <div>
                 <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300">
                     <Calendar className="w-3.5 h-3.5" />
                     {apod.date}
                   </span>
@@ -126,9 +126,9 @@ export default function NasaApodSection() {
               <div className="flex items-center gap-3 pt-4 border-t border-slate-800">
                 <button
                   onClick={fetchApod}
-                  className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 text-gray-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500/50 text-gray-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all"
                 >
-                  <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+                  <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Muat Ulang APOD</span>
                 </button>
 
@@ -136,7 +136,7 @@ export default function NasaApodSection() {
                   href={apod.hdurl || apod.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-emerald-600/80 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-lg shadow-emerald-600/20"
+                  className="px-4 py-2.5 rounded-xl bg-cyan-600/80 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-lg shadow-cyan-600/20"
                 >
                   <span>Buka di NASA</span>
                   <ExternalLink className="w-3.5 h-3.5" />

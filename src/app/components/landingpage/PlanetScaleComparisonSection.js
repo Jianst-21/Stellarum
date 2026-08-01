@@ -415,7 +415,7 @@ export default function PlanetScaleComparisonSection() {
           onClick={() => setActiveTab('lineup')}
           className={`px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg ${
             activeTab === 'lineup'
-              ? 'bg-purple-600 text-white shadow-purple-600/30 border border-purple-400'
+              ? 'bg-cyan-600 text-white shadow-cyan-600/30 border border-cyan-400'
               : 'bg-slate-900/80 text-gray-400 hover:text-white border border-slate-800'
           }`}
         >
@@ -427,14 +427,14 @@ export default function PlanetScaleComparisonSection() {
           onClick={() => setActiveTab('quiz')}
           className={`px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg relative ${
             activeTab === 'quiz'
-              ? 'bg-amber-600 text-white shadow-amber-600/30 border border-amber-400'
+              ? 'bg-cyan-600 text-white shadow-cyan-600/30 border border-cyan-400'
               : 'bg-slate-900/80 text-gray-400 hover:text-white border border-slate-800'
           }`}
         >
-          <Trophy className="w-4 h-4 text-amber-300 animate-bounce" />
+          <Trophy className="w-4 h-4 text-cyan-300 animate-bounce" />
           <span>Tantangan Quiz Urutan 3D</span>
           {scoreCount > 0 && (
-            <span className="ml-1 bg-amber-400 text-slate-950 text-xs font-black px-2 py-0.5 rounded-full">
+            <span className="ml-1 bg-cyan-400 text-slate-950 text-xs font-black px-2 py-0.5 rounded-full">
               {scoreCount} Win
             </span>
           )}
@@ -467,15 +467,15 @@ export default function PlanetScaleComparisonSection() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-purple-400 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse"></span>
+              <label className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
                 Objek Kedua (Kanan)
               </label>
               <div className="relative">
                 <select
                   value={rightId}
                   onChange={(e) => setRightId(e.target.value)}
-                  className="w-full appearance-none bg-slate-950/90 border border-purple-500/40 hover:border-purple-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer shadow-lg"
+                  className="w-full appearance-none bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all cursor-pointer shadow-lg"
                 >
                   {CELESTIAL_BODIES.map((b) => (
                     <option key={b.id} value={b.id} className="bg-slate-900 text-white py-1">
@@ -483,7 +483,7 @@ export default function PlanetScaleComparisonSection() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -527,12 +527,12 @@ export default function PlanetScaleComparisonSection() {
                 <PlanetSphere3D id={rightObj.id} sizePx={rightPx} />
               </div>
               <div className="mt-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-purple-400 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-500/40 shadow-md">
+                <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 shadow-md">
                   {rightObj.category}
                 </span>
                 <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
                   {rightObj.name}
-                  <RotateCw className="w-4 h-4 text-purple-400 opacity-60" />
+                  <RotateCw className="w-4 h-4 text-cyan-400 opacity-60" />
                 </h3>
                 <p className="text-sm text-gray-300 mt-1">Diameter: <strong className="text-white">{rightObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
                 <p className="text-xs text-gray-400 mt-0.5">{rightObj.ratioToEarth}× Ukuran Bumi</p>
@@ -549,7 +549,7 @@ export default function PlanetScaleComparisonSection() {
               </div>
             </div>
             <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+              <Sparkles className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-white">{rightObj.name}</h4>
                 <p className="text-xs text-gray-400 mt-1 leading-relaxed">{rightObj.description}</p>
@@ -575,30 +575,30 @@ export default function PlanetScaleComparisonSection() {
                   <select
                     value={sortCriteria}
                     onChange={(e) => setSortCriteria(e.target.value)}
-                    className="appearance-none bg-slate-950/90 border border-purple-500/40 hover:border-purple-400 rounded-xl px-3.5 py-2 pr-9 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer shadow-md"
+                    className="appearance-none bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 rounded-xl px-3.5 py-2 pr-9 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all cursor-pointer shadow-md"
                   >
                     <option value="diameterDesc">Ukuran Diameter (Terbesar ke Terkecil)</option>
                     <option value="distAsc">Jarak dari Matahari (Terdekat ke Terjauh)</option>
                     <option value="tempDesc">Suhu Rata-Rata (Terpanas ke Terdingin)</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
                 </div>
               </div>
 
               <div className="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 shadow-md">
                 <button
                   onClick={prevLineupPage}
-                  className="p-1.5 rounded-lg hover:bg-purple-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
+                  className="p-1.5 rounded-lg hover:bg-cyan-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
                   title="Halaman Sebelumnya"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="text-xs font-semibold px-2 text-purple-300">
+                <span className="text-xs font-semibold px-2 text-cyan-300">
                   {lineupPageIndex + 1} / {totalLineupPages}
                 </span>
                 <button
                   onClick={nextLineupPage}
-                  className="p-1.5 rounded-lg hover:bg-purple-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
+                  className="p-1.5 rounded-lg hover:bg-cyan-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
                   title="Halaman Selanjutnya"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -614,18 +614,18 @@ export default function PlanetScaleComparisonSection() {
               return (
                 <div
                   key={b.id}
-                  className="flex flex-col items-center justify-between bg-[#020307] border border-purple-500/30 hover:border-purple-400 rounded-2xl p-5 shadow-xl hover:shadow-[0_0_24px_rgba(168,85,247,0.25)] transition-all group relative overflow-hidden"
+                  className="flex flex-col items-center justify-between bg-[#020307] border border-cyan-500/30 hover:border-cyan-400 rounded-2xl p-5 shadow-xl hover:shadow-[0_0_24px_rgba(34,211,238,0.2)] transition-all group relative overflow-hidden"
                 >
                   <PlanetStageStarryGrid />
-                  <span className="text-[10px] font-black tracking-widest text-purple-400 bg-purple-950/80 px-3 py-0.5 rounded-full border border-purple-500/40 mb-2 shadow-md z-10">
+                  <span className="text-[10px] font-black tracking-widest text-cyan-400 bg-cyan-950/80 px-3 py-0.5 rounded-full border border-cyan-500/40 mb-2 shadow-md z-10">
                     #{globalRank}
                   </span>
                   <div className="h-44 flex items-center justify-center w-full my-auto z-10">
                     <PlanetSphere3D id={b.id} sizePx={px} />
                   </div>
                   <div className="text-center mt-3 z-10">
-                    <h4 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">{b.name}</h4>
-                    <p className="text-xs text-purple-400 font-semibold mt-1">
+                    <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">{b.name}</h4>
+                    <p className="text-xs text-cyan-400 font-semibold mt-1">
                       {sortCriteria === 'diameterDesc' && `${b.diameterKm.toLocaleString('id-ID')} km`}
                       {sortCriteria === 'distAsc' && (b.distKm === 0 ? 'Pusat' : `${b.distKm} jt km`)}
                       {sortCriteria === 'tempDesc' && `${b.tempC}°C`}
@@ -642,7 +642,7 @@ export default function PlanetScaleComparisonSection() {
       {activeTab === 'quiz' && (
         <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
           <div className="text-center max-w-xl mx-auto mb-8 relative z-10">
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider">
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 uppercase tracking-wider">
               Mini-Game Tantangan Urutan
             </span>
             <h3 className="text-2xl md:text-3xl font-extrabold text-white mt-2">
@@ -658,10 +658,10 @@ export default function PlanetScaleComparisonSection() {
             {userOrder.map((item, idx) => (
               <div
                 key={item.id}
-                className="bg-[#020307] border border-amber-500/30 hover:border-amber-400 rounded-2xl p-4 flex flex-col items-center relative group hover:shadow-[0_0_24px_rgba(245,158,11,0.25)] transition-all overflow-hidden"
+                className="bg-[#020307] border border-cyan-500/30 hover:border-cyan-400 rounded-2xl p-4 flex flex-col items-center relative group hover:shadow-[0_0_24px_rgba(34,211,238,0.2)] transition-all overflow-hidden"
               >
                 <PlanetStageStarryGrid />
-                <div className="absolute top-3 left-3 w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs flex items-center justify-center z-10">
+                <div className="absolute top-3 left-3 w-7 h-7 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-black text-xs flex items-center justify-center z-10">
                   #{idx + 1}
                 </div>
 
@@ -670,7 +670,7 @@ export default function PlanetScaleComparisonSection() {
                   <button
                     onClick={() => moveQuizItem(idx, idx - 1)}
                     disabled={idx === 0}
-                    className="w-7 h-7 rounded-lg bg-[#05060f] border border-amber-500/30 text-gray-300 disabled:opacity-30 hover:bg-amber-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
+                    className="w-7 h-7 rounded-lg bg-[#05060f] border border-cyan-500/30 text-gray-300 disabled:opacity-30 hover:bg-cyan-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
                     title="Geser Kiri"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -678,7 +678,7 @@ export default function PlanetScaleComparisonSection() {
                   <button
                     onClick={() => moveQuizItem(idx, idx + 1)}
                     disabled={idx === userOrder.length - 1}
-                    className="w-7 h-7 rounded-lg bg-[#05060f] border border-amber-500/30 text-gray-300 disabled:opacity-30 hover:bg-amber-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
+                    className="w-7 h-7 rounded-lg bg-[#05060f] border border-cyan-500/30 text-gray-300 disabled:opacity-30 hover:bg-cyan-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
                     title="Geser Kanan"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -693,7 +693,7 @@ export default function PlanetScaleComparisonSection() {
                 <p className="text-xs text-gray-400 mt-0.5 z-10">{item.category}</p>
 
                 {quizChecked && (
-                  <span className="text-xs font-semibold text-amber-300 mt-2 px-2.5 py-1 rounded-md bg-amber-950/80 border border-amber-500/40 z-10">
+                  <span className="text-xs font-semibold text-cyan-300 mt-2 px-2.5 py-1 rounded-md bg-cyan-950/80 border border-cyan-500/40 z-10">
                     {item.diameterKm.toLocaleString('id-ID')} km
                   </span>
                 )}
@@ -705,7 +705,7 @@ export default function PlanetScaleComparisonSection() {
             {!quizChecked ? (
               <button
                 onClick={checkQuizAnswer}
-                className="px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-sm shadow-xl shadow-orange-600/30 transition-all flex items-center gap-2"
+                className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-cyan-600/30 transition-all flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Cek Jawaban Saya</span>
@@ -732,9 +732,9 @@ export default function PlanetScaleComparisonSection() {
 
                 <button
                   onClick={generateQuiz}
-                  className="px-6 py-2.5 rounded-xl bg-slate-950 border border-slate-700 hover:border-amber-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-lg"
+                  className="px-6 py-2.5 rounded-xl bg-slate-950 border border-slate-700 hover:border-cyan-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-lg"
                 >
-                  <RefreshCw className="w-4 h-4 text-amber-400" />
+                  <RefreshCw className="w-4 h-4 text-cyan-400" />
                   <span>Mainkan Ronde Baru (Acak Planet)</span>
                 </button>
               </div>
