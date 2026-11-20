@@ -1,5 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'apod.nasa.gov',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images-assets.nasa.gov',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.nasa.gov',
+      },
+    ],
+  },
   async headers() {
     return [
       {

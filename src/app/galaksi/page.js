@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import StarfieldBg from '@/app/components/global/StarfieldBg';
 import Navbar from '@/app/components/global/Navbar';
 import Footer from '@/app/components/global/Footer';
@@ -80,11 +81,12 @@ export default function GalaksiPage() {
               className="rounded-xl overflow-hidden border border-white/12 bg-space-abyss/80 grid grid-cols-1 lg:grid-cols-12"
             >
               <div className="lg:col-span-5 relative aspect-[16/10] lg:aspect-auto bg-space-black overflow-hidden">
-                <img
+                <Image
                   src={item.img}
                   alt={item.title}
                   width={640}
                   height={400}
+                  sizes="(max-width: 1024px) 100vw, 40vw"
                   className="w-full h-full object-cover"
                 />
               </div>

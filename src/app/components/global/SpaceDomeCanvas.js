@@ -69,48 +69,28 @@ export default function SpaceDomeCanvas() {
     let scrollProgress = 0;
     let currentYaw = -0.45;
     let currentPitch = 0.22;
+    let cachedMaxScroll = 1;
 
-    const updateScroll = () => {
-      const maxScroll = Math.max(
+    const recalcMaxScroll = () => {
+      cachedMaxScroll = Math.max(
         document.documentElement.scrollHeight - window.innerHeight,
         1
       );
-      scrollProgress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
     };
+
+    const updateScroll = () => {
+      scrollProgress = Math.max(0, Math.min(1, window.scrollY / cachedMaxScroll));
+    };
+
+    recalcMaxScroll();
     updateScroll();
-
-    const handleResize = () => {
-      const w = window.innerWidth;
-      const h = Math.max(window.innerHeight, 1);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-      updateScroll();
-      if (reducedMotion) {
-        renderer.render(scene, camera);
-      }
-    };
-
-    let tabVisible = document.visibilityState !== 'hidden';
-    const handleVisibility = () => {
-      tabVisible = document.visibilityState !== 'hidden';
-    };
-
-    window.addEventListener('scroll', updateScroll, { passive: true });
-    window.addEventListener('resize', handleResize, { passive: true });
-    document.addEventListener('visibilitychange', handleVisibility);
-
-    if (reducedMotion) {
-      dome.update(0);
-      renderer.render(scene, camera);
-    }
 
     let animId = 0;
     const clock = new THREE.Clock();
 
     const animate = () => {
       animId = window.requestAnimationFrame(animate);
-      if (!tabVisible) return;
+      if (document.visibilityState === 'hidden') return;
 
       const dt = Math.min(clock.getDelta(), 0.05);
       const elapsed = clock.getElapsedTime();
@@ -127,12 +107,53 @@ export default function SpaceDomeCanvas() {
       renderer.render(scene, camera);
     };
 
-    if (!reducedMotion) {
-      animate();
+    const startLoop = () => {
+      if (animId || reducedMotion) return;
+      clock.getDelta();
+      animId = window.requestAnimationFrame(animate);
+    };
+
+    const stopLoop = () => {
+      if (animId) {
+        window.cancelAnimationFrame(animId);
+        animId = 0;
+      }
+    };
+
+    const handleResize = () => {
+      const w = window.innerWidth;
+      const h = Math.max(window.innerHeight, 1);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      recalcMaxScroll();
+      updateScroll();
+      if (reducedMotion) {
+        renderer.render(scene, camera);
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        stopLoop();
+      } else {
+        startLoop();
+      }
+    };
+
+    window.addEventListener('scroll', updateScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    if (reducedMotion) {
+      dome.update(0);
+      renderer.render(scene, camera);
+    } else {
+      startLoop();
     }
 
     return () => {
-      if (animId) window.cancelAnimationFrame(animId);
+      stopLoop();
       window.removeEventListener('scroll', updateScroll);
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibility);

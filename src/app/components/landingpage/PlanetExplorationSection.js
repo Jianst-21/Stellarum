@@ -1,10 +1,11 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { PLANET_CATALOG } from '@/app/data/solarObjects';
 
-const FEATURED_IDS = ['jupiter', 'saturn', 'mars', 'neptune'];
+const FEATURED_IDS = ['earth', 'mars', 'jupiter', 'saturn'];
 
 export default function PlanetExplorationSection() {
-  const featured = PLANET_CATALOG.filter((p) => FEATURED_IDS.includes(p.id));
+  const featured = FEATURED_IDS.map((id) => PLANET_CATALOG.find((p) => p.id === id)).filter(Boolean);
 
   return (
     <section
@@ -41,14 +42,15 @@ export default function PlanetExplorationSection() {
             className="group rounded-xl overflow-hidden border border-white/12 bg-space-abyss/75 hover:border-cyan-glow/55 transition-colors flex flex-col"
           >
             <div className="relative aspect-[16/10] w-full overflow-hidden bg-space-black">
-              <img
+              <Image
                 src={planet.img}
                 alt={`Planet ${planet.name}`}
                 width={480}
                 height={300}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-space-abyss via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-space-abyss via-transparent to-transparent pointer-events-none" />
             </div>
 
             <div className="p-5 flex-1 flex flex-col justify-between gap-4">

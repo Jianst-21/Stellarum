@@ -1,12 +1,47 @@
+import dynamic from 'next/dynamic';
 import StarfieldBg from '@/app/components/global/StarfieldBg';
 import Navbar from '@/app/components/global/Navbar';
 import Footer from '@/app/components/global/Footer';
 import HeroSection from '@/app/components/landingpage/HeroSection';
-import PlanetScaleComparisonSection from '@/app/components/landingpage/PlanetScaleComparisonSection';
 import PlanetExplorationSection from '@/app/components/landingpage/PlanetExplorationSection';
-import SpaceExplorationTimelineSection from '@/app/components/landingpage/SpaceExplorationTimelineSection';
-import SpaceTriviaQuizSection from '@/app/components/landingpage/SpaceTriviaQuizSection';
-import NasaApodSection from '@/app/components/landingpage/NasaApodSection';
+
+const PlanetScaleComparisonSection = dynamic(
+  () => import('@/app/components/landingpage/PlanetScaleComparisonSection'),
+  {
+    loading: () => (
+      <div className="py-20 max-w-7xl mx-auto px-5 sm:px-8 border-t border-white/10 flex items-center justify-center font-mono text-xs text-ink-muted min-h-[400px]">
+        Memuat laboratorium perbandingan skala...
+      </div>
+    ),
+  }
+);
+
+const SpaceExplorationTimelineSection = dynamic(
+  () => import('@/app/components/landingpage/SpaceExplorationTimelineSection'),
+  {
+    loading: () => (
+      <div className="py-20 max-w-7xl mx-auto px-5 sm:px-8 border-t border-white/10 min-h-[300px]" />
+    ),
+  }
+);
+
+const SpaceTriviaQuizSection = dynamic(
+  () => import('@/app/components/landingpage/SpaceTriviaQuizSection'),
+  {
+    loading: () => (
+      <div className="py-20 max-w-7xl mx-auto px-5 sm:px-8 border-t border-white/10 min-h-[300px]" />
+    ),
+  }
+);
+
+const NasaApodSection = dynamic(
+  () => import('@/app/components/landingpage/NasaApodSection'),
+  {
+    loading: () => (
+      <div className="py-20 max-w-7xl mx-auto px-5 sm:px-8 border-t border-white/10 min-h-[300px]" />
+    ),
+  }
+);
 
 export default function HomePage() {
   return (

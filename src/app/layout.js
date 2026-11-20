@@ -34,6 +34,10 @@ export default function RootLayout({ children }) {
       lang="id"
       className={`${titilliumWeb.variable} ${manrope.variable} ${jetbrainsMono.variable}`}
     >
+      <head>
+        <link rel="preload" as="image" href="/textures/planets/earth.jpg" />
+        <link rel="preload" as="image" href="/textures/planets/earthclouds.jpg" />
+      </head>
       <body className="antialiased bg-space-black text-ink-primary font-body selection:bg-cyan-glow/30 selection:text-ink-primary">
         {children}
       </body>

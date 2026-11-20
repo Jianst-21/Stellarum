@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronDown } from 'lucide-react';
 import { PLANET_CATALOG } from '@/app/data/solarObjects';
 
@@ -64,14 +65,15 @@ export default function PlanetCatalogClient() {
             >
               <div>
                 <div className="relative aspect-[16/10] w-full bg-space-black overflow-hidden">
-                  <img
+                  <Image
                     src={p.img}
                     alt={`Planet ${p.name}`}
                     width={480}
                     height={300}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-space-abyss via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-space-abyss via-transparent to-transparent pointer-events-none" />
                 </div>
 
                 <div className="p-5 sm:p-6">

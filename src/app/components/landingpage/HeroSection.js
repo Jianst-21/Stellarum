@@ -19,7 +19,7 @@ const HeroPlanetShowcase3D = dynamic(
 );
 
 export default function HeroSection() {
-  const [activeIndex, setActiveIndex] = useState(1); // Start with Saturn for distinct silhouette
+  const [activeIndex, setActiveIndex] = useState(0); // Earth (Bumi) as the primary home showcase
   const activeBody = HERO_SHOWCASE_OBJECTS[activeIndex];
 
   const handlePrev = () => {

@@ -90,13 +90,19 @@ function buildBodyGroup(body, radius, disposables) {
 /**
  * Renders both selected celestial bodies inside ONE single Three.js WebGL context
  * so proportional comparison is optically consistent and GPU-safe on mobile.
+ *
+ * Performance optimizations:
+ * - Single WebGLRenderer context reused across all left/right body selections.
+ * - Animation loop automatically pauses when off-screen or tab is backgrounded.
  */
 function DualPlanetStage3D({ leftObj, rightObj }) {
   const mountRef = useRef(null);
+  const stateRef = useRef(null);
 
+  // Setup single WebGL canvas & scene once on mount
   useEffect(() => {
     const container = mountRef.current;
-    if (!container || !leftObj || !rightObj) return;
+    if (!container) return;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const width = container.clientWidth || 720;
@@ -136,36 +142,40 @@ function DualPlanetStage3D({ leftObj, rightObj }) {
     fillLight.position.set(-5, -2, -4);
     scene.add(fillLight);
 
-    const maxD = Math.max(leftObj.diameterKm, rightObj.diameterKm);
-    const leftRatio = leftObj.diameterKm / maxD;
-    const rightRatio = rightObj.diameterKm / maxD;
-
-    // Clamped perceptual floor so small moons remain legible beside the Sun
-    const maxRadius = 1.48;
-    const leftRadius = Math.max(0.28, maxRadius * Math.pow(leftRatio, 0.58));
-    const rightRadius = Math.max(0.28, maxRadius * Math.pow(rightRatio, 0.58));
-
-    const disposables = [];
-    const leftBuilt = buildBodyGroup(leftObj, leftRadius, disposables);
-    const rightBuilt = buildBodyGroup(rightObj, rightRadius, disposables);
-
-    const spread = width < 520 ? 1.55 : 2.35;
-    leftBuilt.group.position.set(-spread, 0, 0);
-    rightBuilt.group.position.set(spread, 0, 0);
-    scene.add(leftBuilt.group);
-    scene.add(rightBuilt.group);
+    const stageGroup = new THREE.Group();
+    scene.add(stageGroup);
 
     let isVisible = true;
-    const observer =
-      typeof IntersectionObserver !== 'undefined'
-        ? new IntersectionObserver(
-            ([entry]) => {
-              isVisible = entry.isIntersecting;
-            },
-            { threshold: 0.05 }
-          )
-        : null;
-    if (observer) observer.observe(container);
+    let animId = 0;
+    const clock = new THREE.Clock();
+    let currentLeftMesh = null;
+    let currentRightMesh = null;
+
+    const renderFrame = () => {
+      renderer.render(scene, camera);
+    };
+
+    const loop = () => {
+      animId = window.requestAnimationFrame(loop);
+      if (!isVisible || document.visibilityState === 'hidden') return;
+      const dt = Math.min(clock.getDelta(), 0.05);
+      if (currentLeftMesh) currentLeftMesh.rotation.y += dt * 0.22;
+      if (currentRightMesh) currentRightMesh.rotation.y += dt * 0.22;
+      renderer.render(scene, camera);
+    };
+
+    const startLoop = () => {
+      if (animId || reducedMotion) return;
+      clock.getDelta();
+      animId = window.requestAnimationFrame(loop);
+    };
+
+    const stopLoop = () => {
+      if (animId) {
+        window.cancelAnimationFrame(animId);
+        animId = 0;
+      }
+    };
 
     const handleResize = () => {
       if (!container) return;
@@ -175,37 +185,118 @@ function DualPlanetStage3D({ leftObj, rightObj }) {
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       const nextSpread = w < 520 ? 1.55 : 2.35;
-      leftBuilt.group.position.x = -nextSpread;
-      rightBuilt.group.position.x = nextSpread;
-      renderer.render(scene, camera);
+      if (stateRef.current?.leftBuilt) {
+        stateRef.current.leftBuilt.group.position.x = -nextSpread;
+      }
+      if (stateRef.current?.rightBuilt) {
+        stateRef.current.rightBuilt.group.position.x = nextSpread;
+      }
+      renderFrame();
     };
     window.addEventListener('resize', handleResize, { passive: true });
 
-    let animId = 0;
-    const clock = new THREE.Clock();
+    const observer =
+      typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(
+            ([entry]) => {
+              isVisible = entry.isIntersecting;
+              if (isVisible && document.visibilityState !== 'hidden') {
+                startLoop();
+              } else {
+                stopLoop();
+              }
+            },
+            { threshold: 0.05 }
+          )
+        : null;
+    if (observer) observer.observe(container);
 
-    const animate = () => {
-      animId = window.requestAnimationFrame(animate);
-      if (!isVisible || document.visibilityState === 'hidden') return;
-      const dt = Math.min(clock.getDelta(), 0.05);
-      leftBuilt.mesh.rotation.y += dt * 0.22;
-      rightBuilt.mesh.rotation.y += dt * 0.22;
-      renderer.render(scene, camera);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        stopLoop();
+      } else if (isVisible) {
+        startLoop();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    stateRef.current = {
+      container,
+      renderer,
+      scene,
+      camera,
+      stageGroup,
+      bodyDisposables: [],
+      leftBuilt: null,
+      rightBuilt: null,
+      setMeshes: (l, r) => {
+        currentLeftMesh = l;
+        currentRightMesh = r;
+      },
+      renderFrame,
     };
 
-    renderer.render(scene, camera);
-    if (!reducedMotion) animate();
+    if (!reducedMotion) {
+      startLoop();
+    } else {
+      renderFrame();
+    }
 
     return () => {
-      if (animId) window.cancelAnimationFrame(animId);
+      stopLoop();
       if (observer) observer.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('resize', handleResize);
-      disposables.forEach((d) => d.dispose());
+      if (stateRef.current?.bodyDisposables) {
+        stateRef.current.bodyDisposables.forEach((d) => d.dispose());
+      }
       renderer.dispose();
       if (container && renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
+      stateRef.current = null;
     };
+  }, []);
+
+  // Update bodies without recreating WebGL context
+  useEffect(() => {
+    const s = stateRef.current;
+    if (!s || !leftObj || !rightObj) return;
+
+    const { container, stageGroup, bodyDisposables, setMeshes, renderFrame } = s;
+
+    // Dispose previous bodies
+    bodyDisposables.forEach((d) => d.dispose());
+    bodyDisposables.length = 0;
+    while (stageGroup.children.length > 0) {
+      stageGroup.remove(stageGroup.children[0]);
+    }
+
+    const width = container.clientWidth || 720;
+    const maxD = Math.max(leftObj.diameterKm, rightObj.diameterKm);
+    const leftRatio = leftObj.diameterKm / maxD;
+    const rightRatio = rightObj.diameterKm / maxD;
+
+    // Clamped perceptual floor so small moons remain legible beside the Sun
+    const maxRadius = 1.48;
+    const leftRadius = Math.max(0.28, maxRadius * Math.pow(leftRatio, 0.58));
+    const rightRadius = Math.max(0.28, maxRadius * Math.pow(rightRatio, 0.58));
+
+    const leftBuilt = buildBodyGroup(leftObj, leftRadius, bodyDisposables);
+    const rightBuilt = buildBodyGroup(rightObj, rightRadius, bodyDisposables);
+
+    const spread = width < 520 ? 1.55 : 2.35;
+    leftBuilt.group.position.set(-spread, 0, 0);
+    rightBuilt.group.position.set(spread, 0, 0);
+
+    stageGroup.add(leftBuilt.group);
+    stageGroup.add(rightBuilt.group);
+
+    s.leftBuilt = leftBuilt;
+    s.rightBuilt = rightBuilt;
+    setMeshes(leftBuilt.mesh, rightBuilt.mesh);
+
+    renderFrame();
   }, [leftObj, rightObj]);
 
   return (
