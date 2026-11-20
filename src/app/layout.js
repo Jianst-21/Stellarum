@@ -26,6 +26,13 @@ export const metadata = {
   title: 'Stellarum: Portal Eksplorasi Astronomi dan Tata Surya 3D',
   description:
     'Portal edukasi astronomi interaktif dengan simulasi Tata Surya 3D real-time, laboratorium skala planet, dan katalog objek langit.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 export default function RootLayout({ children }) {
