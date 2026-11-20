@@ -2,743 +2,652 @@
 
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { ArrowLeftRight, Info, Sparkles, Scale, ChevronDown, RotateCw, ArrowUpDown, Trophy, CheckCircle2, XCircle, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  ArrowUpDown,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import { SCALE_BODIES } from '@/app/data/solarObjects';
 
-const CELESTIAL_BODIES = [
-  { id: 'sun', name: 'Matahari', diameterKm: 1392700, distKm: 0, tempC: 5500, ratioToEarth: 109.2, color: 'from-amber-400 to-orange-600', shadow: 'shadow-orange-500/50', category: 'Bintang', description: '99.8% dari seluruh massa Tata Surya. Bisa memuat 1.300.000 planet Bumi di dalamnya.' },
-  { id: 'jupiter', name: 'Jupiter', diameterKm: 139820, distKm: 778.6, tempC: -110, ratioToEarth: 11.0, color: 'from-amber-600 via-orange-400 to-amber-700', shadow: 'shadow-amber-500/40', category: 'Raksasa Gas', description: 'Planet terbesar. Bintik Merah Raksasa-nya saja lebih besar dari planet Bumi.' },
-  { id: 'saturn', name: 'Saturnus', diameterKm: 116460, distKm: 1433.5, tempC: -140, ratioToEarth: 9.1, color: 'from-yellow-300 via-amber-400 to-yellow-600', shadow: 'shadow-yellow-500/40', category: 'Raksasa Gas', description: 'Terkenal dengan cincin es raksasa yang membentang hingga 282.000 km.' },
-  { id: 'uranus', name: 'Uranus', diameterKm: 50724, distKm: 2872.5, tempC: -195, ratioToEarth: 4.0, color: 'from-cyan-300 to-teal-500', shadow: 'shadow-cyan-400/40', category: 'Raksasa Es', description: 'Planet paling dingin dengan rotasi menyamping (kemiringan sumbu 98 derajat).' },
-  { id: 'neptune', name: 'Neptunus', diameterKm: 49244, distKm: 4495.1, tempC: -200, ratioToEarth: 3.9, color: 'from-blue-500 to-indigo-700', shadow: 'shadow-blue-600/40', category: 'Raksasa Es', description: 'Memiliki angin terkuat di Tata Surya, mencapai kecepatan 2.100 km/jam.' },
-  { id: 'earth', name: 'Bumi', diameterKm: 12742, distKm: 149.6, tempC: 15, ratioToEarth: 1.0, color: 'from-cyan-400 via-blue-500 to-emerald-400', shadow: 'shadow-cyan-500/50', category: 'Planet Kebumian', description: 'Satu-satunya tempat di alam semesta yang diketahui memiliki kehidupan & air cair.' },
-  { id: 'venus', name: 'Venus', diameterKm: 12104, distKm: 108.2, tempC: 465, ratioToEarth: 0.95, color: 'from-amber-200 to-yellow-500', shadow: 'shadow-amber-400/40', category: 'Planet Kebumian', description: 'Planet terpanas (465°C) akibat efek rumah kaca ekstrem dari atmosfer CO2 pekat.' },
-  { id: 'mars', name: 'Mars', diameterKm: 6779, distKm: 227.9, tempC: -65, ratioToEarth: 0.53, color: 'from-red-500 to-orange-700', shadow: 'shadow-red-500/40', category: 'Planet Kebumian', description: 'Planet Merah berdebu besi oksida. Memiliki Gunung Olympus, gunung tertinggi di Tata Surya.' },
-  { id: 'mercury', name: 'Merkurius', diameterKm: 4879, distKm: 57.9, tempC: 167, ratioToEarth: 0.38, color: 'from-slate-400 to-gray-600', shadow: 'shadow-slate-400/40', category: 'Planet Kebumian', description: 'Planet terkecil dan terdekat ke Matahari. Tidak memiliki atmosfer penyimpan panas.' },
-  { id: 'moon', name: 'Bulan', diameterKm: 3474, distKm: 149.6, tempC: -20, ratioToEarth: 0.27, color: 'from-gray-200 to-slate-400', shadow: 'shadow-gray-300/40', category: 'Satelit Alami', description: 'Satelit alami tunggal Bumi. Tarikan gravitasinya menciptakan pasang surut air laut.' }
-];
+const sharedLoader = new THREE.TextureLoader();
+const sharedTextureCache = new Map();
 
-const PLANET_COLORS = {
-  sun: 0xffaa00,
-  jupiter: 0xdca675,
-  saturn: 0xe3c88f,
-  uranus: 0x80deea,
-  neptune: 0x4f7ded,
-  earth: 0x2b82c5,
-  venus: 0xe6b86a,
-  mars: 0xc05333,
-  mercury: 0x8c8c88,
-  moon: 0x9e9e9e,
-};
-
-// Global Texture Cache for high performance
-const globalTextureLoader = new THREE.TextureLoader();
-const textureMapCache = new Map();
-
-function getCachedTexture(id, callback) {
-  if (textureMapCache.has(id)) {
-    callback(textureMapCache.get(id));
+function getCachedTex(path, onLoad) {
+  if (!path) return;
+  if (sharedTextureCache.has(path)) {
+    onLoad(sharedTextureCache.get(path));
     return;
   }
-  const texturePath = `/textures/planets/${id}.jpg`;
-  globalTextureLoader.load(
-    texturePath,
+  sharedLoader.load(
+    path,
     (tex) => {
-      textureMapCache.set(id, tex);
-      callback(tex);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      sharedTextureCache.set(path, tex);
+      onLoad(tex);
     },
     undefined,
     () => {}
   );
 }
 
-// Helper for Perceptual Logarithmic 3D Showcase Scaling
-const getLogScalePx = (diameterKm, minPx = 65, maxPx = 135) => {
-  const minLog = Math.log(3474);     // Moon
-  const maxLog = Math.log(1392700);  // Sun
-  const currentLog = Math.log(diameterKm);
-  const ratio = (currentLog - minLog) / (maxLog - minLog);
-  return Math.round(minPx + ratio * (maxPx - minPx));
-};
+function buildBodyGroup(body, radius, disposables) {
+  const group = new THREE.Group();
+  const geo = new THREE.SphereGeometry(radius, 48, 48);
+  const mat =
+    body.id === 'sun'
+      ? new THREE.MeshBasicMaterial({ color: body.colorHex })
+      : new THREE.MeshStandardMaterial({
+          color: body.colorHex,
+          roughness: 0.85,
+          metalness: 0.05,
+        });
+  disposables.push(geo, mat);
+  const mesh = new THREE.Mesh(geo, mat);
+  group.add(mesh);
 
-// Organic, non-symmetric random starfield overlay (NO grid lines, just clean starry space)
-function PlanetStageStarryGrid() {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-      {/* Deep space black background */}
-      <div className="absolute inset-0 bg-[#020307]" />
+  getCachedTex(body.texture, (tex) => {
+    mat.map = tex;
+    mat.color.setHex(0xffffff);
+    mat.needsUpdate = true;
+  });
 
-      {/* Truly random scattered fine star dots */}
-      <svg className="absolute inset-0 w-full h-full opacity-65">
-        <circle cx="5%" cy="14%" r="0.7" fill="#22D3EE" opacity="0.8" />
-        <circle cx="12%" cy="68%" r="0.9" fill="#ffffff" opacity="0.65" />
-        <circle cx="18%" cy="29%" r="1.1" fill="#22D3EE" opacity="0.85" />
-        <circle cx="24%" cy="84%" r="0.6" fill="#ffffff" opacity="0.5" />
-        <circle cx="33%" cy="11%" r="0.8" fill="#ffffff" opacity="0.75" />
-        <circle cx="39%" cy="47%" r="0.5" fill="#22D3EE" opacity="0.6" />
-        <circle cx="45%" cy="88%" r="0.9" fill="#ffffff" opacity="0.7" />
-        <circle cx="52%" cy="23%" r="0.6" fill="#22D3EE" opacity="0.8" />
-        <circle cx="58%" cy="63%" r="1.0" fill="#ffffff" opacity="0.8" />
-        <circle cx="64%" cy="16%" r="0.5" fill="#22D3EE" opacity="0.65" />
-        <circle cx="71%" cy="79%" r="0.8" fill="#ffffff" opacity="0.75" />
-        <circle cx="77%" cy="37%" r="0.6" fill="#22D3EE" opacity="0.7" />
-        <circle cx="83%" cy="92%" r="0.9" fill="#ffffff" opacity="0.6" />
-        <circle cx="88%" cy="19%" r="0.7" fill="#22D3EE" opacity="0.8" />
-        <circle cx="95%" cy="61%" r="0.8" fill="#ffffff" opacity="0.7" />
-        <circle cx="9%" cy="93%" r="0.6" fill="#22D3EE" opacity="0.6" />
-        <circle cx="28%" cy="53%" r="0.7" fill="#ffffff" opacity="0.7" />
-        <circle cx="67%" cy="95%" r="0.8" fill="#22D3EE" opacity="0.7" />
-        <circle cx="91%" cy="42%" r="0.6" fill="#ffffff" opacity="0.8" />
-        <circle cx="16%" cy="7%" r="0.8" fill="#22D3EE" opacity="0.75" />
-        <circle cx="49%" cy="62%" r="0.5" fill="#ffffff" opacity="0.55" />
-        <circle cx="85%" cy="74%" r="0.75" fill="#22D3EE" opacity="0.7" />
-      </svg>
-    </div>
-  );
+  if (body.id === 'saturn') {
+    const innerR = radius * 1.2;
+    const outerR = radius * 1.85;
+    const ringGeo = new THREE.RingGeometry(innerR, outerR, 72);
+    const pos = ringGeo.attributes.position;
+    const uvs = ringGeo.attributes.uv;
+    for (let i = 0; i < pos.count; i++) {
+      const r = Math.hypot(pos.getX(i), pos.getY(i));
+      uvs.setXY(i, (r - innerR) / (outerR - innerR), 0.5);
+    }
+    uvs.needsUpdate = true;
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: 0xe6d5b8,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.9,
+      roughness: 0.85,
+    });
+    disposables.push(ringGeo, ringMat);
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.rotation.x = Math.PI / 2.25;
+    group.add(ringMesh);
+
+    getCachedTex('/textures/planets/saturnring.jpg', (tex) => {
+      ringMat.map = tex;
+      ringMat.needsUpdate = true;
+    });
+  }
+
+  return { group, mesh };
 }
 
-// 3D Sphere Renderer with Matte Surface (Non-glossy) and Zero White Flash on Mount
-function PlanetSphere3D({ id, sizePx }) {
-  const containerRef = useRef(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+/**
+ * Renders both selected celestial bodies inside ONE single Three.js WebGL context
+ * so proportional comparison is optically consistent and GPU-safe on mobile.
+ */
+function DualPlanetStage3D({ leftObj, rightObj }) {
+  const mountRef = useRef(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const container = mountRef.current;
+    if (!container || !leftObj || !rightObj) return;
 
-    const width = sizePx;
-    const height = sizePx;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const width = container.clientWidth || 720;
+    const height = container.clientHeight || 320;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    // Camera z position: 5.8 for Saturn to give its 3D rings generous breathing room without clipping left/right edges
-    camera.position.z = id === 'saturn' ? 5.8 : 2.8;
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        stencil: false,
+        powerPreference: 'high-performance',
+      });
+    } catch {
+      return;
+    }
 
-    const isMobile = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.0 : 1.5));
-    renderer.setClearColor(0x000000, 0); // Explicit transparent background (removes white box on render)
+    renderer.setClearColor(0x000000, 0);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    const ambient = new THREE.AmbientLight(0xffffff, id === 'sun' ? 2.5 : 1.8);
-    scene.add(ambient);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, width / Math.max(height, 1), 0.1, 100);
+    camera.position.set(0, 0.25, 7.6);
+    camera.lookAt(0, 0, 0);
 
-    if (id !== 'sun') {
-      const keyLight = new THREE.DirectionalLight(0xfff5ea, 2.0);
-      keyLight.position.set(5, 3, 5);
-      scene.add(keyLight);
+    scene.add(new THREE.AmbientLight(0xdbeafe, 0.75));
+    const keyLight = new THREE.DirectionalLight(0xfff5e4, 2.2);
+    keyLight.position.set(5, 4, 6);
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0x7cdee4, 0.55);
+    fillLight.position.set(-5, -2, -4);
+    scene.add(fillLight);
 
-      const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      fillLight.position.set(-5, -3, -5);
-      scene.add(fillLight);
-    }
+    const maxD = Math.max(leftObj.diameterKm, rightObj.diameterKm);
+    const leftRatio = leftObj.diameterKm / maxD;
+    const rightRatio = rightObj.diameterKm / maxD;
 
-    // Unified Group so sphere AND Saturn ring rotate together in 3D space
-    const planetGroup = new THREE.Group();
-    scene.add(planetGroup);
+    // Clamped perceptual floor so small moons remain legible beside the Sun
+    const maxRadius = 1.48;
+    const leftRadius = Math.max(0.28, maxRadius * Math.pow(leftRatio, 0.58));
+    const rightRadius = Math.max(0.28, maxRadius * Math.pow(rightRatio, 0.58));
 
-    const geo = new THREE.SphereGeometry(1, 32, 32);
-    const baseColor = PLANET_COLORS[id] || 0xcccccc;
+    const disposables = [];
+    const leftBuilt = buildBodyGroup(leftObj, leftRadius, disposables);
+    const rightBuilt = buildBodyGroup(rightObj, rightRadius, disposables);
 
-    let material;
-    if (id === 'sun') {
-      material = new THREE.MeshBasicMaterial({ color: baseColor });
-    } else {
-      // Matte realistic surface material (Non-glossy, high roughness)
-      material = new THREE.MeshStandardMaterial({
-        color: baseColor,
-        roughness: 0.85,
-        metalness: 0.05,
-      });
-    }
+    const spread = width < 520 ? 1.55 : 2.35;
+    leftBuilt.group.position.set(-spread, 0, 0);
+    rightBuilt.group.position.set(spread, 0, 0);
+    scene.add(leftBuilt.group);
+    scene.add(rightBuilt.group);
 
-    const mesh = new THREE.Mesh(geo, material);
-    planetGroup.add(mesh);
-
-    // Apply Cached Texture
-    getCachedTexture(id, (loadedTex) => {
-      material.map = loadedTex;
-      material.needsUpdate = true;
-    });
-
-    if (id === 'saturn') {
-      const ringGeo = new THREE.RingGeometry(1.15, 1.70, 64);
-      // Radial UV Mapping Fix so saturnring.jpg renders concentric ring bands
-      const pos = ringGeo.attributes.position;
-      const uvs = ringGeo.attributes.uv;
-      for (let i = 0; i < pos.count; i++) {
-        const vx = pos.getX(i);
-        const vy = pos.getY(i);
-        const r = Math.sqrt(vx * vx + vy * vy);
-        const u = (r - 1.15) / (1.70 - 1.15);
-        uvs.setXY(i, u, 0.5);
-      }
-      uvs.needsUpdate = true;
-
-      const ringMat = new THREE.MeshBasicMaterial({
-        map: globalTextureLoader.load('/textures/planets/saturnring.jpg'),
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.90,
-      });
-      const saturnRingMesh = new THREE.Mesh(ringGeo, ringMat);
-      saturnRingMesh.rotation.x = Math.PI / 2.3;
-      planetGroup.add(saturnRingMesh);
-    }
-
-    // Interactive Drag-to-Rotate Mouse & Touch Controls
-    let isDragging = false;
-    let prevX = 0;
-    let prevY = 0;
-
-    const onPointerDown = (e) => {
-      isDragging = true;
-      prevX = e.clientX || (e.touches && e.touches[0].clientX);
-      prevY = e.clientY || (e.touches && e.touches[0].clientY);
-      container.style.cursor = 'grabbing';
-    };
-
-    const onPointerMove = (e) => {
-      if (!isDragging) return;
-      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-      const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-      if (!clientX || !clientY) return;
-      const deltaX = clientX - prevX;
-      const deltaY = clientY - prevY;
-
-      planetGroup.rotation.y += deltaX * 0.012;
-      planetGroup.rotation.x += deltaY * 0.012;
-
-      prevX = clientX;
-      prevY = clientY;
-    };
-
-    const onPointerUp = () => {
-      isDragging = false;
-      container.style.cursor = 'grab';
-    };
-
-    container.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('mouseup', onPointerUp);
-
-    container.addEventListener('touchstart', onPointerDown, { passive: true });
-    window.addEventListener('touchmove', onPointerMove, { passive: true });
-    window.addEventListener('touchend', onPointerUp);
-
-    // IntersectionObserver Auto-Pause for 3D Cards
     let isVisible = true;
-    let observer;
-    if ('IntersectionObserver' in window) {
-      observer = new IntersectionObserver(([entry]) => {
-        isVisible = entry.isIntersecting;
-      }, { threshold: 0.05 });
-      observer.observe(container);
-    }
+    const observer =
+      typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(
+            ([entry]) => {
+              isVisible = entry.isIntersecting;
+            },
+            { threshold: 0.05 }
+          )
+        : null;
+    if (observer) observer.observe(container);
 
-    let animId;
-    let lastRenderTime = performance.now();
-    const animate = (now) => {
-      animId = requestAnimationFrame(animate);
-      if (!isVisible) return; // AUTO PAUSE WHEN OFF-SCREEN! Saves 80% GPU!
+    const handleResize = () => {
+      if (!container) return;
+      const w = container.clientWidth || 720;
+      const h = container.clientHeight || 320;
+      camera.aspect = w / Math.max(h, 1);
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      const nextSpread = w < 520 ? 1.55 : 2.35;
+      leftBuilt.group.position.x = -nextSpread;
+      rightBuilt.group.position.x = nextSpread;
+      renderer.render(scene, camera);
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
 
-      const deltaMs = now - lastRenderTime;
-      if (deltaMs < 15) return; // CAP AT MAX 60 FPS (approx 16.6ms per frame)
-      lastRenderTime = now;
+    let animId = 0;
+    const clock = new THREE.Clock();
 
-      if (!isDragging) {
-        planetGroup.rotation.y += 0.008;
-      }
+    const animate = () => {
+      animId = window.requestAnimationFrame(animate);
+      if (!isVisible || document.visibilityState === 'hidden') return;
+      const dt = Math.min(clock.getDelta(), 0.05);
+      leftBuilt.mesh.rotation.y += dt * 0.22;
+      rightBuilt.mesh.rotation.y += dt * 0.22;
       renderer.render(scene, camera);
     };
 
-    // Render initial frame and trigger smooth fade-in
     renderer.render(scene, camera);
-    setIsLoaded(true);
-    animate();
+    if (!reducedMotion) animate();
 
     return () => {
+      if (animId) window.cancelAnimationFrame(animId);
       if (observer) observer.disconnect();
-      cancelAnimationFrame(animId);
-      container.removeEventListener('mousedown', onPointerDown);
-      window.removeEventListener('mousemove', onPointerMove);
-      window.removeEventListener('mouseup', onPointerUp);
-      container.removeEventListener('touchstart', onPointerDown);
-      window.removeEventListener('touchmove', onPointerMove);
-      window.removeEventListener('touchend', onPointerUp);
-
-      if (renderer.domElement && container.contains(renderer.domElement)) {
+      window.removeEventListener('resize', handleResize);
+      disposables.forEach((d) => d.dispose());
+      renderer.dispose();
+      if (container && renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
-      renderer.forceContextLoss();
-      renderer.dispose();
-      geo.dispose();
-      material.dispose();
-      scene.clear();
     };
-  }, [id, sizePx]);
+  }, [leftObj, rightObj]);
 
   return (
     <div
-      ref={containerRef}
-      style={{ width: `${sizePx}px`, height: `${sizePx}px` }}
-      className={`flex items-center justify-center transition-all duration-500 ease-out cursor-grab active:cursor-grabbing hover:scale-105 ${
-        isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-      }`}
+      ref={mountRef}
+      role="img"
+      aria-label={`Perbandingan 3D ${leftObj.name} dan ${rightObj.name}`}
+      className="w-full h-[240px] sm:h-[300px]"
     />
   );
 }
 
 export default function PlanetScaleComparisonSection() {
   const [activeTab, setActiveTab] = useState('compare');
-
-  // 1-on-1 Compare State
   const [leftId, setLeftId] = useState('jupiter');
   const [rightId, setRightId] = useState('earth');
-
-  // Sorting Lineup State
   const [sortCriteria, setSortCriteria] = useState('diameterDesc');
 
-  // Sorting Quiz State
-  const [userOrder, setUserOrder] = useState([]);
+  const [userOrder, setUserOrder] = useState(() => [
+    SCALE_BODIES[1],
+    SCALE_BODIES[5],
+    SCALE_BODIES[3],
+    SCALE_BODIES[7],
+  ]);
   const [quizChecked, setQuizChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [scoreCount, setScoreCount] = useState(0);
 
   const generateQuiz = () => {
-    const shuffled = [...CELESTIAL_BODIES].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 4);
-    setUserOrder([...selected].sort(() => 0.5 - Math.random()));
+    const pool = [...SCALE_BODIES];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    setUserOrder(pool.slice(0, 4));
     setQuizChecked(false);
     setIsCorrect(false);
   };
 
-  useEffect(() => {
-    generateQuiz();
-  }, []);
-
   const moveQuizItem = (fromIdx, toIdx) => {
     if (toIdx < 0 || toIdx >= userOrder.length) return;
-    const newArr = [...userOrder];
-    const [moved] = newArr.splice(fromIdx, 1);
-    newArr.splice(toIdx, 0, moved);
-    setUserOrder(newArr);
+    const next = [...userOrder];
+    const [moved] = next.splice(fromIdx, 1);
+    next.splice(toIdx, 0, moved);
+    setUserOrder(next);
     setQuizChecked(false);
   };
 
   const checkQuizAnswer = () => {
-    let correct = true;
+    let ok = true;
     for (let i = 0; i < userOrder.length - 1; i++) {
       if (userOrder[i].diameterKm < userOrder[i + 1].diameterKm) {
-        correct = false;
+        ok = false;
         break;
       }
     }
-    setIsCorrect(correct);
+    setIsCorrect(ok);
     setQuizChecked(true);
-    if (correct) setScoreCount((prev) => prev + 1);
+    if (ok) setScoreCount((prev) => prev + 1);
   };
 
-  const leftObj = CELESTIAL_BODIES.find((b) => b.id === leftId);
-  const rightObj = CELESTIAL_BODIES.find((b) => b.id === rightId);
-  const maxDiameter = Math.max(leftObj.diameterKm, rightObj.diameterKm);
-  const leftPx = Math.max(40, Math.round((leftObj.diameterKm / maxDiameter) * 210));
-  const rightPx = Math.max(40, Math.round((rightObj.diameterKm / maxDiameter) * 210));
-  const timesLarger = (leftObj.diameterKm / rightObj.diameterKm).toFixed(1);
-  const isLeftLarger = leftObj.diameterKm >= rightObj.diameterKm;
+  const leftObj = SCALE_BODIES.find((b) => b.id === leftId) || SCALE_BODIES[1];
+  const rightObj = SCALE_BODIES.find((b) => b.id === rightId) || SCALE_BODIES[5];
+  const ratioValue = (
+    Math.max(leftObj.diameterKm, rightObj.diameterKm) /
+    Math.min(leftObj.diameterKm, rightObj.diameterKm)
+  ).toFixed(1);
+  const largerName =
+    leftObj.diameterKm >= rightObj.diameterKm ? leftObj.name : rightObj.name;
+  const smallerName =
+    leftObj.diameterKm >= rightObj.diameterKm ? rightObj.name : leftObj.name;
 
-  const getSortedLineup = () => {
-    const list = [...CELESTIAL_BODIES];
-    if (sortCriteria === 'diameterDesc') return list.sort((a, b) => b.diameterKm - a.diameterKm);
-    if (sortCriteria === 'distAsc') return list.sort((a, b) => a.distKm - b.distKm);
-    if (sortCriteria === 'tempDesc') return list.sort((a, b) => b.tempC - a.tempC);
-    return list;
+  const sortedBodies = [...SCALE_BODIES].sort((a, b) => {
+    if (sortCriteria === 'diameterDesc') return b.diameterKm - a.diameterKm;
+    if (sortCriteria === 'distAsc') return a.distKm - b.distKm;
+    return b.tempC - a.tempC;
+  });
+
+  const maxLog = Math.log(1392700);
+  const minLog = Math.log(3474);
+  const getBarWidth = (diameterKm) => {
+    const pct = ((Math.log(diameterKm) - minLog) / (maxLog - minLog)) * 84 + 16;
+    return `${Math.round(pct)}%`;
   };
-
-  const sortedBodies = getSortedLineup();
-
-  // Pagination logic for 3D Lineup Showcase (4 items per page)
-  const [lineupPageIndex, setLineupPageIndex] = useState(0);
-  const itemsPerPage = 4;
-  const totalLineupPages = Math.ceil(sortedBodies.length / itemsPerPage);
-
-  const prevLineupPage = () => {
-    setLineupPageIndex((prev) => (prev > 0 ? prev - 1 : totalLineupPages - 1));
-  };
-
-  const nextLineupPage = () => {
-    setLineupPageIndex((prev) => (prev < totalLineupPages - 1 ? prev + 1 : 0));
-  };
-
-  useEffect(() => {
-    setLineupPageIndex(0);
-  }, [sortCriteria]);
-
-  const currentVisibleBodies = sortedBodies.slice(
-    lineupPageIndex * itemsPerPage,
-    (lineupPageIndex + 1) * itemsPerPage
-  );
 
   return (
-    <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
-      {/* Section Header */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
-          <Scale className="w-4 h-4" />
-          <span>Laboratorium Skala & Quiz 3D</span>
+    <section
+      id="skala"
+      aria-labelledby="skala-heading"
+      className="py-16 sm:py-24 px-5 sm:px-8 max-w-7xl mx-auto border-t border-white/10"
+    >
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+        <div className="max-w-2xl">
+          <h2
+            id="skala-heading"
+            className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.02em] text-ink-primary leading-tight mb-3"
+          >
+            Laboratorium Skala Tata Surya
+          </h2>
+          <p className="text-base text-ink-secondary leading-relaxed">
+            Bandingkan diameter dua benda langit secara 3D dalam satu panggung optik, urutkan berdasarkan parameter fisik, atau uji insting skala Anda.
+          </p>
         </div>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
-          Eksplorasi Skala & Game Urutan Kosmik
-        </h2>
-        <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
-          Bandingkan ukuran planet secara 3D, urutkan barisan kosmik, dan uji pengetahuanmu dalam mini-game tantangan urutan planet.
-        </p>
+
+        <div
+          role="tablist"
+          aria-label="Mode laboratorium skala"
+          className="inline-flex flex-wrap gap-2"
+        >
+          {[
+            { id: 'compare', label: 'Perbandingan 1-vs-1', icon: ArrowLeftRight },
+            { id: 'lineup', label: 'Barisan Skala', icon: ArrowUpDown },
+            { id: 'quiz', label: 'Uji Urutan', icon: CheckCircle2 },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setActiveTab(tab.id)}
+                className={`min-h-[44px] px-4 rounded-lg text-sm font-medium border transition-colors inline-flex items-center gap-2 ${
+                  active
+                    ? 'bg-cyan-glow text-space-navy border-cyan-glow font-bold'
+                    : 'bg-space-abyss/80 text-ink-secondary border-white/15 hover:border-cyan-glow/50 hover:text-ink-primary'
+                }`}
+              >
+                <Icon className="w-4 h-4" aria-hidden="true" />
+                <span>{tab.label}</span>
+                {tab.id === 'quiz' && scoreCount > 0 && (
+                  <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-space-navy/20 tabular-nums">
+                    {scoreCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Mode Navigation Tabs */}
-      <div className="flex flex-wrap justify-center gap-3 mb-10">
-        <button
-          onClick={() => setActiveTab('compare')}
-          className={`px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg ${
-            activeTab === 'compare'
-              ? 'bg-cyan-600 text-white shadow-cyan-600/30 border border-cyan-400'
-              : 'bg-slate-900/80 text-gray-400 hover:text-white border border-slate-800'
-          }`}
-        >
-          <ArrowLeftRight className="w-4 h-4" />
-          <span>Perbandingan 1-vs-1 3D</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('lineup')}
-          className={`px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg ${
-            activeTab === 'lineup'
-              ? 'bg-cyan-600 text-white shadow-cyan-600/30 border border-cyan-400'
-              : 'bg-slate-900/80 text-gray-400 hover:text-white border border-slate-800'
-          }`}
-        >
-          <ArrowUpDown className="w-4 h-4" />
-          <span>Barisan Skala & Sorting 3D</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('quiz')}
-          className={`px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all shadow-lg relative ${
-            activeTab === 'quiz'
-              ? 'bg-cyan-600 text-white shadow-cyan-600/30 border border-cyan-400'
-              : 'bg-slate-900/80 text-gray-400 hover:text-white border border-slate-800'
-          }`}
-        >
-          <Trophy className="w-4 h-4 text-cyan-300 animate-bounce" />
-          <span>Tantangan Quiz Urutan 3D</span>
-          {scoreCount > 0 && (
-            <span className="ml-1 bg-cyan-400 text-slate-950 text-xs font-black px-2 py-0.5 rounded-full">
-              {scoreCount} Win
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* TAB 1: 1-VS-1 COMPARE */}
+      {/* TAB 1: Unified Single-Canvas 1-vs-1 3D Comparison */}
       {activeTab === 'compare' && (
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                Objek Pertama (Kiri)
+        <div className="rounded-xl border border-white/12 bg-space-abyss/75 p-5 sm:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label
+                htmlFor="scale-left-select"
+                className="block font-mono text-xs text-ink-secondary mb-2"
+              >
+                Objek Kiri
               </label>
               <div className="relative">
                 <select
+                  id="scale-left-select"
                   value={leftId}
                   onChange={(e) => setLeftId(e.target.value)}
-                  className="w-full appearance-none bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all cursor-pointer shadow-lg"
+                  className="w-full min-h-[44px] bg-space-black/85 border border-cyan-glow/30 hover:border-cyan-glow rounded-lg px-4 py-2.5 text-sm text-ink-primary font-medium transition-colors"
                 >
-                  {CELESTIAL_BODIES.map((b) => (
-                    <option key={b.id} value={b.id} className="bg-slate-900 text-white py-1">
+                  {SCALE_BODIES.map((b) => (
+                    <option key={b.id} value={b.id} className="bg-space-abyss text-ink-primary">
                       {b.name} ({b.diameterKm.toLocaleString('id-ID')} km)
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                Objek Kedua (Kanan)
+            <div>
+              <label
+                htmlFor="scale-right-select"
+                className="block font-mono text-xs text-ink-secondary mb-2"
+              >
+                Objek Kanan
               </label>
               <div className="relative">
                 <select
+                  id="scale-right-select"
                   value={rightId}
                   onChange={(e) => setRightId(e.target.value)}
-                  className="w-full appearance-none bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 rounded-xl px-4 py-3 pr-10 text-white font-medium focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all cursor-pointer shadow-lg"
+                  className="w-full min-h-[44px] bg-space-black/85 border border-cyan-glow/30 hover:border-cyan-glow rounded-lg px-4 py-2.5 text-sm text-ink-primary font-medium transition-colors"
                 >
-                  {CELESTIAL_BODIES.map((b) => (
-                    <option key={b.id} value={b.id} className="bg-slate-900 text-white py-1">
+                  {SCALE_BODIES.map((b) => (
+                    <option key={b.id} value={b.id} className="bg-space-abyss text-ink-primary">
                       {b.name} ({b.diameterKm.toLocaleString('id-ID')} km)
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
               </div>
             </div>
           </div>
 
-          {/* 3D Planet Comparison Stage Card with Starry Grid ONLY */}
-          <div className="bg-[#020307] border border-cyan-500/40 rounded-2xl p-6 md:p-12 mb-8 flex flex-col md:flex-row items-center justify-around gap-8 min-h-[360px] relative overflow-hidden shadow-2xl">
-            <PlanetStageStarryGrid />
+          <div className="rounded-xl border border-cyan-glow/20 bg-space-black/65 px-4 py-6 mb-6">
+            <DualPlanetStage3D leftObj={leftObj} rightObj={rightObj} />
 
-            <div className="flex flex-col items-center justify-center flex-1 text-center group z-10">
-              <div className="h-60 flex items-center justify-center relative w-full">
-                <PlanetSphere3D id={leftObj.id} sizePx={leftPx} />
-              </div>
-              <div className="mt-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 shadow-md">
-                  {leftObj.category}
-                </span>
-                <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
+            <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-4 items-center text-center">
+              <div>
+                <span className="font-mono text-xs text-ink-muted block">{leftObj.category}</span>
+                <span className="font-display text-xl font-bold text-ink-primary block mt-0.5">
                   {leftObj.name}
-                  <RotateCw className="w-4 h-4 text-cyan-400 opacity-60" />
-                </h3>
-                <p className="text-sm text-gray-300 mt-1">Diameter: <strong className="text-white">{leftObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
-                <p className="text-xs text-gray-400 mt-0.5">{leftObj.ratioToEarth}× Ukuran Bumi</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center z-10">
-              <div className="w-12 h-12 rounded-full bg-slate-900 border border-cyan-500/50 flex items-center justify-center text-cyan-400 font-bold shadow-lg my-2">
-                <ArrowLeftRight className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div className="bg-slate-900/95 border border-cyan-500/40 rounded-xl px-4 py-2 text-center backdrop-blur-md shadow-xl max-w-[200px]">
-                <span className="text-xs text-gray-400 block">Rasio Ukuran</span>
-                <span className="text-lg font-extrabold text-cyan-300">{timesLarger}×</span>
-                <span className="text-[11px] text-gray-400 block mt-0.5">
-                  {isLeftLarger ? `${leftObj.name} > ${rightObj.name}` : `${rightObj.name} > ${leftObj.name}`}
+                </span>
+                <span className="font-mono text-xs text-cyan-glow tabular-nums">
+                  {leftObj.diameterKm.toLocaleString('id-ID')} km ({leftObj.ratioToEarth}x Bumi)
                 </span>
               </div>
-            </div>
 
-            <div className="flex flex-col items-center justify-center flex-1 text-center group z-10">
-              <div className="h-60 flex items-center justify-center relative w-full">
-                <PlanetSphere3D id={rightObj.id} sizePx={rightPx} />
-              </div>
-              <div className="mt-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 shadow-md">
-                  {rightObj.category}
+              <div className="py-2 px-4 rounded-lg border border-white/12 bg-space-abyss/80">
+                <span className="font-mono text-[11px] text-ink-muted block">Rasio Diameter</span>
+                <span className="font-mono text-2xl font-bold text-amber-star tabular-nums">
+                  {ratioValue}x
                 </span>
-                <h3 className="text-2xl font-bold text-white mt-2 flex items-center justify-center gap-2">
+                <span className="text-xs text-ink-secondary block mt-0.5">
+                  {leftObj.id === rightObj.id
+                    ? 'Ukuran identik'
+                    : `${largerName} lebih lebar dari ${smallerName}`}
+                </span>
+              </div>
+
+              <div>
+                <span className="font-mono text-xs text-ink-muted block">{rightObj.category}</span>
+                <span className="font-display text-xl font-bold text-ink-primary block mt-0.5">
                   {rightObj.name}
-                  <RotateCw className="w-4 h-4 text-cyan-400 opacity-60" />
-                </h3>
-                <p className="text-sm text-gray-300 mt-1">Diameter: <strong className="text-white">{rightObj.diameterKm.toLocaleString('id-ID')} km</strong></p>
-                <p className="text-xs text-gray-400 mt-0.5">{rightObj.ratioToEarth}× Ukuran Bumi</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-            <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex items-start gap-3">
-              <Info className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-semibold text-white">{leftObj.name}</h4>
-                <p className="text-xs text-gray-400 mt-1 leading-relaxed">{leftObj.description}</p>
-              </div>
-            </div>
-            <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-semibold text-white">{rightObj.name}</h4>
-                <p className="text-xs text-gray-400 mt-1 leading-relaxed">{rightObj.description}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: LINEUP & SORTING 3D */}
-      {activeTab === 'lineup' && (
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800 relative z-10">
-            <div>
-              <h3 className="text-xl font-bold text-white">Barisan Benda Kosmik 3D</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Menampilkan 4 objek per halaman. Gunakan tombol panah untuk menggeser.</p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400 font-medium">Urutkan:</span>
-                <div className="relative">
-                  <select
-                    value={sortCriteria}
-                    onChange={(e) => setSortCriteria(e.target.value)}
-                    className="appearance-none bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 rounded-xl px-3.5 py-2 pr-9 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all cursor-pointer shadow-md"
-                  >
-                    <option value="diameterDesc">Ukuran Diameter (Terbesar ke Terkecil)</option>
-                    <option value="distAsc">Jarak dari Matahari (Terdekat ke Terjauh)</option>
-                    <option value="tempDesc">Suhu Rata-Rata (Terpanas ke Terdingin)</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 shadow-md">
-                <button
-                  onClick={prevLineupPage}
-                  className="p-1.5 rounded-lg hover:bg-cyan-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
-                  title="Halaman Sebelumnya"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <span className="text-xs font-semibold px-2 text-cyan-300">
-                  {lineupPageIndex + 1} / {totalLineupPages}
                 </span>
-                <button
-                  onClick={nextLineupPage}
-                  className="p-1.5 rounded-lg hover:bg-cyan-600/80 text-gray-300 hover:text-white transition-all active:scale-95"
-                  title="Halaman Selanjutnya"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+                <span className="font-mono text-xs text-cyan-glow tabular-nums">
+                  {rightObj.diameterKm.toLocaleString('id-ID')} km ({rightObj.ratioToEarth}x Bumi)
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-h-[320px] items-stretch relative z-10">
-            {currentVisibleBodies.map((b, idxInPage) => {
-              const globalRank = lineupPageIndex * itemsPerPage + idxInPage + 1;
-              const px = getLogScalePx(b.diameterKm, 70, 135);
-              return (
-                <div
-                  key={b.id}
-                  className="flex flex-col items-center justify-between bg-[#020307] border border-cyan-500/30 hover:border-cyan-400 rounded-2xl p-5 shadow-xl hover:shadow-[0_0_24px_rgba(34,211,238,0.2)] transition-all group relative overflow-hidden"
-                >
-                  <PlanetStageStarryGrid />
-                  <span className="text-[10px] font-black tracking-widest text-cyan-400 bg-cyan-950/80 px-3 py-0.5 rounded-full border border-cyan-500/40 mb-2 shadow-md z-10">
-                    #{globalRank}
-                  </span>
-                  <div className="h-44 flex items-center justify-center w-full my-auto z-10">
-                    <PlanetSphere3D id={b.id} sizePx={px} />
-                  </div>
-                  <div className="text-center mt-3 z-10">
-                    <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">{b.name}</h4>
-                    <p className="text-xs text-cyan-400 font-semibold mt-1">
-                      {sortCriteria === 'diameterDesc' && `${b.diameterKm.toLocaleString('id-ID')} km`}
-                      {sortCriteria === 'distAsc' && (b.distKm === 0 ? 'Pusat' : `${b.distKm} jt km`)}
-                      {sortCriteria === 'tempDesc' && `${b.tempC}°C`}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-ink-secondary">
+            <div className="border-t border-white/10 pt-4">
+              <h3 className="font-display text-base font-bold text-ink-primary mb-1">
+                {leftObj.name}
+              </h3>
+              <p className="leading-relaxed">{leftObj.description}</p>
+            </div>
+            <div className="border-t border-white/10 pt-4">
+              <h3 className="font-display text-base font-bold text-ink-primary mb-1">
+                {rightObj.name}
+              </h3>
+              <p className="leading-relaxed">{rightObj.description}</p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* TAB 3: MINI QUIZ SORTING */}
+      {/* TAB 2: Scale Lineup (Zero extra WebGL contexts) */}
+      {activeTab === 'lineup' && (
+        <div className="rounded-xl border border-white/12 bg-space-abyss/75 p-5 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-white/10">
+            <div>
+              <h3 className="font-display text-xl font-bold text-ink-primary">
+                Peringkat Benda Langit
+              </h3>
+              <p className="text-sm text-ink-secondary mt-1">
+                Skala batang menggunakan perbandingan logaritmik diameter agar tetap terbaca dari Bulan hingga Matahari.
+              </p>
+            </div>
+
+            <div className="relative shrink-0">
+              <label htmlFor="lineup-sort" className="sr-only">
+                Urutkan daftar benda langit
+              </label>
+              <select
+                id="lineup-sort"
+                value={sortCriteria}
+                onChange={(e) => setSortCriteria(e.target.value)}
+                className="min-h-[44px] bg-space-black/85 border border-cyan-glow/30 hover:border-cyan-glow rounded-lg px-4 py-2 text-xs sm:text-sm text-ink-primary font-medium"
+              >
+                <option value="diameterDesc" className="bg-space-abyss">
+                  Diameter (Terbesar ke Terkecil)
+                </option>
+                <option value="distAsc" className="bg-space-abyss">
+                  Jarak dari Matahari (Terdekat)
+                </option>
+                <option value="tempDesc" className="bg-space-abyss">
+                  Suhu Permukaan (Terpanas)
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <ol className="divide-y divide-white/10">
+            {sortedBodies.map((b, idx) => (
+              <li
+                key={b.id}
+                className="py-3.5 grid grid-cols-12 gap-3 items-center"
+              >
+                <div className="col-span-5 sm:col-span-4 flex items-center gap-3 min-w-0">
+                  <span className="font-mono text-xs text-ink-muted w-6 shrink-0 tabular-nums">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <img
+                    src={b.img}
+                    alt={b.name}
+                    width={36}
+                    height={36}
+                    className="w-9 h-9 rounded-full object-cover border border-white/15 shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <span className="font-display text-sm sm:text-base font-bold text-ink-primary block truncate">
+                      {b.name}
+                    </span>
+                    <span className="text-xs text-ink-muted block truncate">{b.category}</span>
+                  </div>
+                </div>
+
+                <div className="hidden sm:block sm:col-span-5">
+                  <div className="h-2 w-full rounded-full bg-space-black/80 overflow-hidden border border-white/10">
+                    <div
+                      className="h-full rounded-full bg-cyan-glow/80"
+                      style={{ width: getBarWidth(b.diameterKm) }}
+                    />
+                  </div>
+                </div>
+
+                <div className="col-span-7 sm:col-span-3 text-right font-mono text-xs sm:text-sm text-ink-primary tabular-nums">
+                  {sortCriteria === 'diameterDesc' && `${b.diameterKm.toLocaleString('id-ID')} km`}
+                  {sortCriteria === 'distAsc' &&
+                    (b.distKm === 0 ? 'Pusat (0 km)' : `${b.distKm} jt km`)}
+                  {sortCriteria === 'tempDesc' && `${b.tempC}°C`}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* TAB 3: Interactive Order Quiz */}
       {activeTab === 'quiz' && (
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 md:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden animate-fadeIn">
-          <div className="text-center max-w-xl mx-auto mb-8 relative z-10">
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 uppercase tracking-wider">
-              Mini-Game Tantangan Urutan
-            </span>
-            <h3 className="text-2xl md:text-3xl font-extrabold text-white mt-2">
-              Urutkan dari Terbesar ke Terkecil!
+        <div className="rounded-xl border border-white/12 bg-space-abyss/75 p-5 sm:p-8">
+          <div className="max-w-2xl mb-6">
+            <h3 className="font-display text-xl sm:text-2xl font-bold text-ink-primary mb-2">
+              Urutkan dari Diameter Terbesar ke Terkecil
             </h3>
-            <p className="text-gray-400 text-xs md:text-sm mt-1">
-              Gunakan tombol panah Kiri / Kanan pada tiap kartu untuk menyusun 4 benda langit 3D di bawah ini dari yang paling besar hingga paling kecil.
+            <p className="text-sm text-ink-secondary">
+              Geser posisi keempat objek di bawah ini dari kiri (terbesar) ke kanan (terkecil), lalu periksa urutan Anda.
             </p>
           </div>
 
-          {/* Quiz Cards Lineup */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {userOrder.map((item, idx) => (
               <div
                 key={item.id}
-                className="bg-[#020307] border border-cyan-500/30 hover:border-cyan-400 rounded-2xl p-4 flex flex-col items-center relative group hover:shadow-[0_0_24px_rgba(34,211,238,0.2)] transition-all overflow-hidden"
+                className="rounded-xl border border-white/15 bg-space-black/75 p-4 flex flex-col justify-between"
               >
-                <PlanetStageStarryGrid />
-                <div className="absolute top-3 left-3 w-7 h-7 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-black text-xs flex items-center justify-center z-10">
-                  #{idx + 1}
-                </div>
-
-                {/* Move Controls */}
-                <div className="absolute top-3 right-3 flex gap-1 z-10">
-                  <button
-                    onClick={() => moveQuizItem(idx, idx - 1)}
-                    disabled={idx === 0}
-                    className="w-7 h-7 rounded-lg bg-[#05060f] border border-cyan-500/30 text-gray-300 disabled:opacity-30 hover:bg-cyan-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
-                    title="Geser Kiri"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => moveQuizItem(idx, idx + 1)}
-                    disabled={idx === userOrder.length - 1}
-                    className="w-7 h-7 rounded-lg bg-[#05060f] border border-cyan-500/30 text-gray-300 disabled:opacity-30 hover:bg-cyan-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
-                    title="Geser Kanan"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="h-36 flex items-center justify-center mt-6 w-full z-10">
-                  <PlanetSphere3D id={item.id} sizePx={90} />
-                </div>
-
-                <h4 className="text-base font-bold text-white mt-2 z-10">{item.name}</h4>
-                <p className="text-xs text-gray-400 mt-0.5 z-10">{item.category}</p>
-
-                {quizChecked && (
-                  <span className="text-xs font-semibold text-cyan-300 mt-2 px-2.5 py-1 rounded-md bg-cyan-950/80 border border-cyan-500/40 z-10">
-                    {item.diameterKm.toLocaleString('id-ID')} km
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-mono text-xs text-amber-star tabular-nums">
+                    Posisi #{idx + 1}
                   </span>
-                )}
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => moveQuizItem(idx, idx - 1)}
+                      disabled={idx === 0}
+                      aria-label={`Geser ${item.name} ke kiri`}
+                      className="min-w-[40px] min-h-[40px] rounded-lg border border-white/15 bg-space-abyss text-ink-primary hover:border-cyan-glow disabled:opacity-35 inline-flex items-center justify-center transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveQuizItem(idx, idx + 1)}
+                      disabled={idx === userOrder.length - 1}
+                      aria-label={`Geser ${item.name} ke kanan`}
+                      className="min-w-[40px] min-h-[40px] rounded-lg border border-white/15 bg-space-abyss text-ink-primary hover:border-cyan-glow disabled:opacity-35 inline-flex items-center justify-center transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center text-center my-2">
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    width={96}
+                    height={96}
+                    className="w-24 h-24 object-contain mb-3"
+                  />
+                  <h4 className="font-display text-lg font-bold text-ink-primary">
+                    {item.name}
+                  </h4>
+                  <span className="text-xs text-ink-secondary">{item.category}</span>
+                  {quizChecked && (
+                    <span className="mt-2 font-mono text-xs text-cyan-glow tabular-nums">
+                      {item.diameterKm.toLocaleString('id-ID')} km
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-col items-center gap-4 border-t border-slate-800 pt-6 relative z-10">
-            {!quizChecked ? (
-              <button
-                onClick={checkQuizAnswer}
-                className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-cyan-600/30 transition-all flex items-center gap-2"
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-5 border-t border-white/10">
+            {quizChecked ? (
+              <div
+                role="status"
+                className={`inline-flex items-center gap-2 text-sm font-medium ${
+                  isCorrect ? 'text-cyan-glow' : 'text-amber-star'
+                }`}
               >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Cek Jawaban Saya</span>
-              </button>
-            ) : (
-              <div className="flex flex-col items-center gap-4 text-center">
-                <div className={`flex items-center gap-2 px-6 py-3 rounded-2xl border text-sm font-bold shadow-xl ${
-                  isCorrect
-                    ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-300'
-                    : 'bg-rose-950/90 border-rose-500/50 text-rose-300'
-                }`}>
-                  {isCorrect ? (
-                    <>
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <span>Hebat! Urutanmu Benar Presisi dari Terbesar ke Terkecil!</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="w-5 h-5 text-rose-400" />
-                      <span>Belum Tepat! Perhatikan Angka Diameter di Setiap Kartu.</span>
-                    </>
-                  )}
-                </div>
-
-                <button
-                  onClick={generateQuiz}
-                  className="px-6 py-2.5 rounded-xl bg-slate-950 border border-slate-700 hover:border-cyan-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-lg"
-                >
-                  <RefreshCw className="w-4 h-4 text-cyan-400" />
-                  <span>Mainkan Ronde Baru (Acak Planet)</span>
-                </button>
+                {isCorrect ? (
+                  <>
+                    <CheckCircle2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+                    <span>Urutan tepat dari diameter terbesar ke terkecil.</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-5 h-5 shrink-0" aria-hidden="true" />
+                    <span>Urutan belum tepat. Bandingkan angka diameter di tiap kartu lalu coba ronde baru.</span>
+                  </>
+                )}
               </div>
+            ) : (
+              <span className="text-xs text-ink-muted">
+                Skor benar sesi ini: <strong className="font-mono text-ink-primary tabular-nums">{scoreCount}</strong>
+              </span>
             )}
+
+            <div className="flex items-center gap-3">
+              {!quizChecked ? (
+                <button
+                  type="button"
+                  onClick={checkQuizAnswer}
+                  className="min-h-[44px] px-6 rounded-lg bg-cyan-glow text-space-navy font-bold text-sm hover:bg-ink-primary transition-colors"
+                >
+                  Periksa Urutan
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={generateQuiz}
+                  className="min-h-[44px] px-5 rounded-lg border border-cyan-glow/40 bg-space-black/80 text-ink-primary text-sm font-medium hover:border-cyan-glow transition-colors inline-flex items-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4 text-cyan-glow" aria-hidden="true" />
+                  <span>Ronde Baru</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

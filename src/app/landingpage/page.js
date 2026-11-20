@@ -1,44 +1,5 @@
-import StarfieldBg from '@/app/components/global/StarfieldBg';
-import Navbar from '@/app/components/global/Navbar';
-import Footer from '@/app/components/global/Footer';
+import { redirect } from 'next/navigation';
 
-import HeroSection from '@/app/components/landingpage/HeroSection';
-import SolarSystemSection from '@/app/components/landingpage/SolarSystemSection';
-import PlanetScaleComparisonSection from '@/app/components/landingpage/PlanetScaleComparisonSection';
-import FunFactsSection from '@/app/components/landingpage/FunFactsSection';
-import SpaceExplorationTimelineSection from '@/app/components/landingpage/SpaceExplorationTimelineSection';
-import PlanetExplorationSection from '@/app/components/landingpage/PlanetExplorationSection';
-import SpaceTriviaQuizSection from '@/app/components/landingpage/SpaceTriviaQuizSection';
-import NasaApodSection from '@/app/components/landingpage/NasaApodSection';
-
-export const metadata = {
-  title: 'Stellarum — Portal Eksplorasi Astronomi & Tata Surya',
-  description: 'Landing Page eksplorasi astronomi interaktif dan visualisasi Tata Surya.',
-};
-
-export default function LandingPage() {
-  return (
-    <div className="relative min-h-screen text-[#ffffff] font-['Hanken_Grotesk'] overflow-x-hidden">
-      {/* Fixed Starfield Background at z-0 */}
-      <StarfieldBg />
-
-      {/* Navbar at z-50 */}
-      <Navbar />
-
-      {/* Main Content at z-10 above Starfield */}
-      <main className="relative z-10 pt-16">
-        <HeroSection />
-        <SolarSystemSection />
-        <PlanetScaleComparisonSection />
-        <FunFactsSection />
-        <SpaceExplorationTimelineSection />
-        <PlanetExplorationSection />
-        <SpaceTriviaQuizSection />
-        <NasaApodSection />
-      </main>
-
-      {/* Footer at z-20 */}
-      <Footer />
-    </div>
-  );
+export default function LandingPageRedirect() {
+  redirect('/');
 }

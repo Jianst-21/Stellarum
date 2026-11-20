@@ -1,75 +1,79 @@
-import { ArrowRight, Compass } from 'lucide-react';
 import Link from 'next/link';
+import { PLANET_CATALOG } from '@/app/data/solarObjects';
+
+const FEATURED_IDS = ['jupiter', 'saturn', 'mars', 'neptune'];
 
 export default function PlanetExplorationSection() {
-  const planetCards = [
-    {
-      name: 'Jupiter',
-      desc: 'Planet terbesar di tata surya kita, dengan badai besar yang telah berlangsung selama berabad-abad.',
-      img: '/images/planets/jupiter.png',
-    },
-    {
-      name: 'Saturnus',
-      desc: 'Dikenal dengan sistem cincin es dan bebatuan yang spektakuler yang mengelilinginya.',
-      img: '/images/planets/saturnus.png',
-    },
-    {
-      name: 'Mars',
-      desc: 'Target utama untuk eksplorasi manusia masa depan, dengan permukaan berbatu merah.',
-      img: '/images/planets/mars.png',
-    },
-    {
-      name: 'Neptunus',
-      desc: 'Planet terjauh di tata surya kita, dunia es biru tua yang sangat dingin dan berangin.',
-      img: '/images/planets/neptunus.png',
-    },
-  ];
+  const featured = PLANET_CATALOG.filter((p) => FEATURED_IDS.includes(p.id));
 
   return (
-    <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto" id="eksplorasi">
-      {/* Standardized Section Header */}
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
-          <Compass className="w-4 h-4" />
-          <span>Katalog Dunia Kosmik</span>
-        </div>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
-          Eksplorasi Planet Utama
-        </h2>
-        <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
-          Jelajahi keajaiban dan karakteristik unik planet-planet terbesar di Tata Surya kita.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {planetCards.map((planet, idx) => (
-          <div
-            key={idx}
-            className="bg-slate-900/60 rounded-2xl overflow-hidden group cursor-pointer border border-slate-800 hover:border-cyan-500/50 transition-all duration-300 hover:-translate-y-1.5 shadow-xl flex flex-col backdrop-blur-xl"
+    <section
+      id="eksplorasi"
+      aria-labelledby="eksplorasi-heading"
+      className="py-16 sm:py-24 px-5 sm:px-8 max-w-7xl mx-auto border-t border-white/10"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+        <div className="max-w-xl">
+          <h2
+            id="eksplorasi-heading"
+            className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.02em] text-ink-primary leading-tight mb-3"
           >
-            <div className="h-48 w-full relative overflow-hidden shrink-0">
-              <div
-                className="bg-cover bg-center w-full h-full group-hover:scale-110 transition-transform duration-700"
-                style={{ backgroundImage: `url('${planet.img}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-            </div>
-            <div className="p-5 flex flex-col gap-2">
-              <h3 className="text-lg text-white font-bold">{planet.name}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed line-clamp-2">{planet.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+            Dunia Utama di Tata Surya
+          </h2>
+          <p className="text-base text-ink-secondary leading-relaxed">
+            Pilih planet mana saja untuk langsung memfokuskan kamera observatorium ke orbitnya di ruang 3D.
+          </p>
+        </div>
 
-      <div className="flex justify-center">
         <Link
           href="/planet"
-          className="inline-flex items-center gap-2 bg-slate-950 text-cyan-400 border border-cyan-500/40 hover:bg-cyan-600 hover:text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-cyan-500/10"
+          className="min-h-[44px] px-5 inline-flex items-center justify-center rounded-lg border border-white/20 bg-space-black/70 text-sm font-medium text-ink-primary hover:border-cyan-glow transition-colors self-start sm:self-auto"
         >
-          <span>Lihat Seluruh Planet</span>
-          <ArrowRight className="w-4 h-4" />
+          Lihat Semua Planet
         </Link>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {featured.map((planet) => (
+          <Link
+            key={planet.id}
+            href={`/tata-surya?objek=${planet.id}`}
+            className="group rounded-xl overflow-hidden border border-white/12 bg-space-abyss/75 hover:border-cyan-glow/55 transition-colors flex flex-col"
+          >
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-space-black">
+              <img
+                src={planet.img}
+                alt={`Planet ${planet.name}`}
+                width={480}
+                height={300}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-space-abyss via-transparent to-transparent" />
+            </div>
+
+            <div className="p-5 flex-1 flex flex-col justify-between gap-4">
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="font-mono text-xs text-amber-star">{planet.category}</span>
+                  <span className="font-mono text-xs text-ink-muted tabular-nums">
+                    {planet.diameterKm.toLocaleString('id-ID')} km
+                  </span>
+                </div>
+                <h3 className="font-display text-xl font-bold text-ink-primary group-hover:text-cyan-glow transition-colors mb-1.5">
+                  {planet.name}
+                </h3>
+                <p className="text-sm text-ink-secondary leading-relaxed">
+                  {planet.desc}
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+                <span className="font-mono text-ink-muted">{planet.distance}</span>
+                <span className="font-semibold text-cyan-glow">Buka di 3D</span>
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   );

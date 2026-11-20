@@ -1,188 +1,199 @@
 'use client';
 
 import { useState } from 'react';
-import { Rocket, Calendar, Award, ChevronRight, Globe, ShieldAlert, Compass } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 const TIMELINE_EVENTS = [
   {
     year: '1957',
-    title: 'Sputnik 1 — Peluncuran Satelit Pertama',
+    title: 'Sputnik 1: Peluncuran Satelit Pertama',
     agency: 'Uni Soviet',
     category: 'Satelit',
-    summary: 'Satelit buatan manusia pertama yang berhasil mengorbit Bumi, menandai dimulainya Era Antariksa.',
-    details: 'Sputnik 1 berbobot 83,6 kg dan memancarkan sinyal radio beep-beep yang dapat ditangkap stasion radio di seluruh dunia selama 21 hari.',
-    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    summary:
+      'Satelit buatan manusia pertama yang berhasil mengorbit Bumi, menandai dimulainya Era Antariksa.',
+    details:
+      'Sputnik 1 berbobot 83,6 kg dan memancarkan sinyal radio yang dapat ditangkap stasiun penerima di seluruh dunia selama 21 hari.',
   },
   {
     year: '1961',
-    title: 'Yuri Gagarin — Manusia Pertama di Luar Angkasa',
-    agency: 'Uni Soviet (Vostok 1)',
+    title: 'Vostok 1: Manusia Pertama di Luar Angkasa',
+    agency: 'Uni Soviet (Yuri Gagarin)',
     category: 'Misi Manusia',
-    summary: 'Yuri Gagarin menjadi manusia pertama yang terbang ke luar angkasa dan mengelilingi Bumi selama 108 menit.',
-    details: 'Kalimat terkenal Gagarin saat peluncuran adalah "Poyekhali!" (Ayo pergi!). Penerbangan ini membuktikan manusia mampu bertahan di lingkungan tanpa bobot.',
-    badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    summary:
+      'Yuri Gagarin menjadi manusia pertama yang mengorbit Bumi dalam penerbangan berdurasi 108 menit.',
+    details:
+      'Penerbangan ini membuktikan tubuh manusia mampu bertahan dan tetap berfungsi selama peluncuran roket serta kondisi mikrogravitasi.',
   },
   {
     year: '1969',
-    title: 'Apollo 11 — Pendaratan Manusia di Bulan',
-    agency: 'NASA (Amerika Serikat)',
+    title: 'Apollo 11: Pendaratan Manusia di Bulan',
+    agency: 'NASA',
     category: 'Misi Manusia',
-    summary: 'Neil Armstrong & Buzz Aldrin menjadi manusia pertama yang berjalan di permukaan Bulan.',
-    details: 'Ucapan ikonik Armstrong: "Satu langkah kecil bagi seorang manusia, satu lompatan besar bagi umat manusia." Misi ini mengumpulkan 21.5 kg sampel batuan Bulan.',
-    badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    summary:
+      'Neil Armstrong dan Buzz Aldrin menjadi manusia pertama yang berjalan di permukaan Bulan.',
+    details:
+      'Misi Apollo 11 membawa pulang 21,5 kg sampel batuan Bulan yang menjadi fondasi studi geologi asal-usul sistem Bumi dan Bulan.',
   },
   {
     year: '1977',
-    title: 'Peluncuran Voyager 1 & 2',
+    title: 'Peluncuran Voyager 1 dan 2',
     agency: 'NASA',
     category: 'Eksplorasi Planet',
-    summary: 'Wahana antariksa kembar dikirim menjelajahi planet-planet luar (Jupiter, Saturnus, Uranus, Neptunus).',
-    details: 'Voyager 1 kini menjadi objek buatan manusia terjauh dari Bumi (>24 miliar km) dan telah memasuki ruang antar-bintang (interstellar space) membawa Golden Record.',
-    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    summary:
+      'Wahana kembar yang memetakan planet-planet raksasa luar (Jupiter, Saturnus, Uranus, Neptunus).',
+    details:
+      'Voyager 1 kini berada lebih dari 24 miliar km dari Bumi di ruang antarbintang sambil membawa Golden Record berisi rekaman suara dan citra peradaban Bumi.',
   },
   {
     year: '1990',
     title: 'Peluncuran Teleskop Antariksa Hubble',
-    agency: 'NASA & ESA',
+    agency: 'NASA dan ESA',
     category: 'Teleskop',
-    summary: 'Teleskop antariksa paling legendaris yang mengubah cara pandang kita terhadap alam semesta.',
-    details: 'Hubble mengambil lebih dari 1.5 juta observasi, membantu menentukan usia alam semesta (13.8 miliar tahun) dan membuktikan keberadaan energi gelap.',
-    badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    summary:
+      'Observatorium optik orbit rendah Bumi yang mengubah pemahaman tentang usia dan ekspansi alam semesta.',
+    details:
+      'Lebih dari 1,5 juta pengamatan Hubble membantu mempersempit estimasi usia alam semesta pada 13,8 miliar tahun dan mengamati galaksi sangat jauh.',
   },
   {
     year: '1998',
     title: 'Pembangunan Stasiun Luar Angkasa Internasional (ISS)',
     agency: 'NASA, Roscosmos, ESA, JAXA, CSA',
     category: 'Misi Manusia',
-    summary: 'Laboratorium mikrogravitas terbesar yang ditempati manusia secara kontinu sejak tahun 2000.',
-    details: 'ISS mengorbit Bumi setiap 90 menit pada kecepatan 28.000 km/jam dan dapat dilihat dengan mata telanjang dari Bumi.',
-    badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    summary:
+      'Laboratorium mikrogravitasi internasional yang dihuni manusia secara berkelanjutan sejak tahun 2000.',
+    details:
+      'ISS mengorbit Bumi pada ketinggian sekitar 400 km dengan kecepatan 28.000 km/jam, menyelesaikan 16 orbit setiap hari.',
   },
   {
     year: '2012',
     title: 'Pendaratan Rover Curiosity di Mars',
     agency: 'NASA',
     category: 'Eksplorasi Planet',
-    summary: 'Rover robotik seukuran mobil mendarat di Kawah Gale Mars menggunakan teknik sky-crane.',
-    details: 'Curiosity menemukan bukti kuat bahwa Mars kuno pernah memiliki danau air tawar yang berpotensi mendukung kehidupan mikroba.',
-    badgeColor: 'bg-red-500/20 text-red-300 border-red-500/30',
+    summary:
+      'Rover laboratorium bergerak seukuran mobil mendarat di Kawah Gale menggunakan teknik sky-crane.',
+    details:
+      'Curiosity menemukan sedimen batuan dan mineral tanah liat yang membuktikan Mars purba pernah memiliki danau air tawar.',
   },
   {
     year: '2021',
-    title: 'Peluncuran Teleskop Antariksa James Webb (JWST)',
+    title: 'Peluncuran Teleskop James Webb (JWST)',
     agency: 'NASA, ESA, CSA',
     category: 'Teleskop',
-    summary: 'Teleskop infra-merah paling canggih yang mengamati galaksi-galaksi pertama setelah Big Bang.',
-    details: 'JWST beroperasi di titik Lagrange L2 (1.5 juta km dari Bumi) dengan cermin berlapis emas 6.5 meter dan perisai matahari seukuran lapangan tenis.',
-    badgeColor: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+    summary:
+      'Teleskop inframerah berdiameter cermin 6,5 meter yang beroperasi di titik Lagrange L2.',
+    details:
+      'Dengan 18 segmen cermin heksagonal berlapis emas, JWST mengamati galaksi paling awal setelah Big Bang dan spektrum atmosfer eksoplanet.',
   },
-  {
-    year: '2024+',
-    title: 'Program Artemis & Eksplorasi Mars Masa Depan',
-    agency: 'NASA & Mitra Internasional',
-    category: 'Misi Manusia',
-    summary: 'Misi mengembalikan manusia ke Bulan (termasuk wanita & astronot kulit berwarna pertama) sebagai pijakan ke Mars.',
-    details: 'Membangun stasiun luar angkasa Lunar Gateway dan pangkalan permanen di kutub selatan Bulan yang kaya akan es air.',
-    badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-  }
 ];
 
 const CATEGORIES = ['Semua', 'Misi Manusia', 'Satelit', 'Teleskop', 'Eksplorasi Planet'];
 
 export default function SpaceExplorationTimelineSection() {
   const [activeCategory, setActiveCategory] = useState('Semua');
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [expandedYear, setExpandedYear] = useState(null);
 
-  const filteredEvents = activeCategory === 'Semua'
-    ? TIMELINE_EVENTS
-    : TIMELINE_EVENTS.filter((e) => e.category === activeCategory);
+  const filteredEvents =
+    activeCategory === 'Semua'
+      ? TIMELINE_EVENTS
+      : TIMELINE_EVENTS.filter((e) => e.category === activeCategory);
 
   return (
-    <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-4 backdrop-blur-md">
-          <Compass className="w-4 h-4" />
-          <span>Jejak Sejarah Manusia</span>
-        </div>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-400 mb-4">
-          Timeline Sejarah Eksplorasi Antariksa
-        </h2>
-        <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
-          Perjalanan panjang umat manusia menembus batas atmosfer, menjelajahi Bulan, hingga mengirim wahananya keluar dari Tata Surya.
-        </p>
-      </div>
-
-      {/* Category Filter Tabs */}
-      <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              activeCategory === cat
-                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30 border border-cyan-400/50'
-                : 'bg-slate-900/80 border border-slate-800 text-gray-400 hover:text-white hover:border-slate-700'
-            }`}
+    <section
+      id="linimasa"
+      aria-labelledby="linimasa-heading"
+      className="py-16 sm:py-24 px-5 sm:px-8 max-w-7xl mx-auto border-t border-white/10"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left Sticky Editorial Intro & Filter */}
+        <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
+          <h2
+            id="linimasa-heading"
+            className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.02em] text-ink-primary leading-tight mb-3"
           >
-            {cat}
-          </button>
-        ))}
-      </div>
+            Jejak Eksplorasi Antariksa
+          </h2>
+          <p className="text-base text-ink-secondary leading-relaxed mb-6">
+            Tonggak utama umat manusia sejak satelit pertama hingga teleskop inframerah di titik L2.
+          </p>
 
-      {/* Vertical Timeline */}
-      <div className="relative border-l-2 border-cyan-500/30 ml-4 md:ml-36 space-y-10 pl-6 md:pl-10">
-        {filteredEvents.map((evt, idx) => (
           <div
-            key={idx}
-            className="relative group transition-all duration-300"
+            role="group"
+            aria-label="Filter kategori misi antariksa"
+            className="flex flex-wrap gap-2"
           >
-            {/* Timeline Dot Icon — 100% Pixel-Perfect Centered on Vertical Line */}
-            <div className="absolute -left-[35px] md:-left-[51px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-2 border-cyan-400 flex items-center justify-center group-hover:scale-125 group-hover:bg-cyan-500 transition-all shadow-md shadow-cyan-500/50 z-10">
-              <span className="w-2 h-2 rounded-full bg-cyan-300"></span>
-            </div>
-
-            {/* Year Badge on the left for desktop (Clean 16px gap to the left of vertical line) */}
-            <div className="md:absolute md:-left-[152px] md:top-1 text-cyan-400 font-extrabold text-lg md:text-xl tracking-wider mb-2 md:mb-0 md:w-24 md:text-right">
-              {evt.year}
-            </div>
-
-            {/* Card Content */}
-            <div className="bg-slate-950/90 md:bg-slate-900/70 border border-slate-800/80 hover:border-cyan-500/50 rounded-2xl p-6 backdrop-blur-none md:backdrop-blur-xl transition-all shadow-xl hover:shadow-cyan-500/10">
-              <div className="flex flex-wrap items-center gap-3 mb-3">
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${evt.badgeColor}`}>
-                  {evt.category}
-                </span>
-                <span className="text-xs text-gray-400 flex items-center gap-1">
-                  <Globe className="w-3.5 h-3.5 text-gray-500" />
-                  {evt.agency}
-                </span>
-              </div>
-
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">
-                {evt.title}
-              </h3>
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4">
-                {evt.summary}
-              </p>
-
-              {/* Collapsible Details */}
-              <button
-                onClick={() => setSelectedEvent(selectedEvent === idx ? null : idx)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
-              >
-                <span>{selectedEvent === idx ? 'Tutup Detail' : 'Baca Detail Lengkap'}</span>
-                <ChevronRight className={`w-4 h-4 transition-transform ${selectedEvent === idx ? 'rotate-90' : ''}`} />
-              </button>
-
-              {selectedEvent === idx && (
-                <div className="mt-4 pt-4 border-t border-slate-800 text-sm text-gray-300 bg-slate-950/60 rounded-xl p-4 animate-fadeIn">
-                  <p className="leading-relaxed">{evt.details}</p>
-                </div>
-              )}
-            </div>
+            {CATEGORIES.map((cat) => {
+              const active = activeCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => {
+                    setActiveCategory(cat);
+                    setExpandedYear(null);
+                  }}
+                  aria-pressed={active}
+                  className={`min-h-[40px] px-3.5 rounded-lg text-xs font-medium border transition-colors ${
+                    active
+                      ? 'bg-cyan-glow text-space-navy border-cyan-glow font-bold'
+                      : 'bg-space-abyss/75 text-ink-secondary border-white/12 hover:border-cyan-glow/50 hover:text-ink-primary'
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
-        ))}
+        </div>
+
+        {/* Right Structured Timeline */}
+        <div className="lg:col-span-8 divide-y divide-white/10 border-t border-b border-white/10">
+          {filteredEvents.map((evt) => {
+            const isOpen = expandedYear === evt.year;
+            return (
+              <article key={evt.year} className="py-5 sm:py-6">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-5 items-start">
+                  <div className="sm:col-span-3">
+                    <span className="font-mono text-xl sm:text-2xl font-bold text-amber-star tabular-nums block">
+                      {evt.year}
+                    </span>
+                    <span className="font-mono text-xs text-ink-muted block mt-0.5">
+                      {evt.category}
+                    </span>
+                  </div>
+
+                  <div className="sm:col-span-9 min-w-0">
+                    <div className="text-xs text-ink-muted mb-1">{evt.agency}</div>
+                    <h3 className="font-display text-lg sm:text-xl font-bold text-ink-primary mb-2">
+                      {evt.title}
+                    </h3>
+                    <p className="text-sm text-ink-secondary leading-relaxed mb-3 max-w-[60ch]">
+                      {evt.summary}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => setExpandedYear(isOpen ? null : evt.year)}
+                      aria-expanded={isOpen}
+                      className="min-h-[36px] inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-glow hover:text-ink-primary transition-colors"
+                    >
+                      <span>{isOpen ? 'Tutup catatan misi' : 'Baca catatan misi'}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {isOpen && (
+                      <div className="mt-3 p-4 rounded-lg border border-white/10 bg-space-abyss/80 text-sm text-ink-secondary leading-relaxed max-w-[60ch]">
+                        {evt.details}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
